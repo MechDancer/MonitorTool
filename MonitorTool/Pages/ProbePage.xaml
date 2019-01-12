@@ -1,0 +1,14 @@
+﻿<Page
+    x:Class="MonitorTool.Pages.ProbePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MonitorTool.Controls"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Unloaded="Page_Unloaded">
+
+    <GridView Name="View" Padding="12">
+        <GridView.Items>
+            <controls:GroupSelector />
+        </GridView.Items>
+    </GridView>
+</Page>
