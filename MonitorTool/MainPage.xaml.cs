@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net;
-using System.Threading;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI.Xaml.Controls;
+using MechDancer.Framework.Net.Presets;
 using MonitorTool.Pages;
 
 namespace MonitorTool {
@@ -14,39 +14,37 @@ namespace MonitorTool {
 
 		private readonly ViewModel _view = new ViewModel();
 
-		private string get(string key, string @default)
-			=> _settings.TryGetValue(key, out var data) ? data.ToString() : @default;
-
 		public MainPage() {
 			InitializeComponent();
 
-			var net = byte.Parse(get("Ip0", "0"));
+			var net = byte.Parse(Get("Ip0", "0"));
 			if (net < 224 || net >= 239) {
 				_view.PageHeader = "设置";
 				MainFrame.Navigate(typeof(SettingsPage));
 			} else {
-				var ip   = IPAddress.Parse($"{get("Ip0", "0")}.{get("Ip1", "0")}.{get("Ip2", "0")}.{get("Ip3", "0")}");
-				var port = ushort.Parse(get("Port", "0"));
-				Hub.SetEndPoint(new IPEndPoint(ip, port));
-				Hub.RemoteHub.Monitor.OpenAll();
-				new Thread(() => {
-							   while (true) {
-								   Hub.RemoteHub.Yell();
-								   Thread.Sleep(500);
-							   }
-						   }).Start();
+				var group = new IPEndPoint
+					(IPAddress.Parse($"{Get("Ip0", "0")}.{Get("Ip1", "0")}.{Get("Ip2", "0")}.{Get("Ip3", "0")}"),
+					 ushort.Parse(Get("Port", "0")));
+
+				new Pacemaker(group).Activate();
+				Hub.Instance.SetEndPoint(group);
 			}
 		}
+
+		private string Get(string key, string @default)
+			=> _settings.TryGetValue(key, out var data) ? data.ToString() : @default;
 
 		private void NavigationView_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args) {
 			if (args.IsSettingsInvoked) {
 				_view.PageHeader = "设置";
 				MainFrame.Navigate(typeof(SettingsPage));
 			} else
-				switch (args.InvokedItem) {
+				switch (_view.PageHeader = args.InvokedItem.ToString()) {
 					case "网络诊断":
-						_view.PageHeader = "网络诊断";
 						MainFrame.Navigate(typeof(ProbePage));
+						break;
+					case "话题监视":
+						MainFrame.Navigate(typeof(TopicPage));
 						break;
 					default:
 						throw new ArgumentOutOfRangeException(args.InvokedItem.ToString());
@@ -54,11 +52,6 @@ namespace MonitorTool {
 		}
 
 		private class ViewModel : INotifyPropertyChanged {
-			public event PropertyChangedEventHandler PropertyChanged;
-
-			private void Notify(string name)
-				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
 			private string _pageHeader = "";
 
 			public string PageHeader {
@@ -68,6 +61,11 @@ namespace MonitorTool {
 					Notify(nameof(PageHeader));
 				}
 			}
+
+			public event PropertyChangedEventHandler PropertyChanged;
+
+			private void Notify(string name)
+				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 	}
 }

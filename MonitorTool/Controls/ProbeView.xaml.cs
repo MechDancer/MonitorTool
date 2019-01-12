@@ -1,6 +1,4 @@
-﻿using MechDancer.Common;
-using MechDancer.Framework.Net.Presets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,22 +6,24 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using Windows.UI.Xaml;
+using MechDancer.Common;
+using MechDancer.Framework.Net.Presets;
 
 namespace MonitorTool.Controls {
 	public sealed partial class ProbeView {
-		private          Probe     _probe;
-		private          bool      _running = true;
-		private readonly ViewModel _view    = new ViewModel();
-
 		public delegate void CloseButtonClickHandler();
 
-		public CloseButtonClickHandler CloseButtonClick;
+		private readonly ViewModel _view = new ViewModel();
+		private          Probe     _probe;
+		private          bool      _running = true;
 
-		public IPEndPoint Group => _probe.Group;
+		public CloseButtonClickHandler CloseButtonClick;
 
 		public ProbeView() => InitializeComponent();
 
 		public ProbeView(IPEndPoint endPoint) : this() => Init(endPoint);
+
+		public IPEndPoint Group => _probe.Group;
 
 		public void Init(IPEndPoint endPoint) {
 			_view.Header = endPoint.ToString();
@@ -42,16 +42,17 @@ namespace MonitorTool.Controls {
 		public void Refresh(TimeSpan timeout)
 			=> _view.Group = _probe[timeout].ToList();
 
+		private void ProbeView_OnUnloaded(object sender, RoutedEventArgs e)
+			=> _running = false;
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+			=> CloseButtonClick();
+
 		private class ViewModel : INotifyPropertyChanged {
-			public event PropertyChangedEventHandler PropertyChanged;
-
-			private void Notify(string name)
-				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-			private string _header = "";
-
 			private readonly ObservableCollection<string> _group
 				= new ObservableCollection<string>();
+
+			private string _header = "";
 
 			public string Header {
 				get => _header;
@@ -63,22 +64,13 @@ namespace MonitorTool.Controls {
 
 			public ICollection<string> Group {
 				get => _group;
-				set {
-					var temp = _group.Retain(value).ToList();
-					foreach (var name in _group.ToList())
-						if (temp.NotContains(name))
-							_group.Remove(name);
-					foreach (var name in value)
-						if (temp.NotContains(name))
-							_group.Add(name);
-				}
+				set => _group.Sync(value);
 			}
+
+			public event PropertyChangedEventHandler PropertyChanged;
+
+			private void Notify(string name)
+				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
-
-		private void ProbeView_OnUnloaded(object sender, RoutedEventArgs e)
-			=> _running = false;
-
-		private void Button_Click(object sender, RoutedEventArgs e)
-			=> CloseButtonClick();
 	}
 }
