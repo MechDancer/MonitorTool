@@ -47,6 +47,9 @@ namespace MonitorTool {
 					case "话题监视":
 						MainFrame.Navigate(typeof(TopicPage));
 						break;
+					case "画图":
+						MainFrame.Navigate(typeof(GraphicPage));
+						break;
 					default:
 						throw new ArgumentOutOfRangeException(args.InvokedItem.ToString());
 				}

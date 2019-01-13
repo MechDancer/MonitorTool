@@ -5,23 +5,30 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using MechDancer.Common;
 using MechDancer.Framework.Net.Presets;
 
 namespace MonitorTool.Controls {
+	/// <inheritdoc cref="Windows.UI.Xaml.Controls.UserControl" />
+	/// <summary>
+	/// 	探针界面
+	/// </summary>
 	public sealed partial class ProbeView {
 		public delegate void CloseButtonClickHandler();
 
-		private readonly ViewModel _view = new ViewModel();
-		private          Probe     _probe;
-		private          bool      _running = true;
+		private readonly ViewModel _view = new ViewModel(); // 数据绑定
+		private          Pacemaker _pacemaker;              // 起搏器
+		private          Probe     _probe;                  // 探针
+		private          bool      _running = true;         // 线程标记
 
-		public CloseButtonClickHandler CloseButtonClick;
+		public CloseButtonClickHandler CloseButtonClick; // 关闭事件
 
 		public ProbeView() => InitializeComponent();
 
-		public ProbeView(IPEndPoint endPoint) : this() => Init(endPoint);
+		public ProbeView(IPEndPoint group) : this()
+			=> Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => Init(group));
 
 		public IPEndPoint Group => _probe.Group;
 
@@ -31,21 +38,27 @@ namespace MonitorTool.Controls {
 				_probe = new Probe(endPoint);
 				new Thread(() => {
 							   while (_running) _probe.Invoke();
-						   })
-					{IsBackground = true}.Start();
+						   }) {IsBackground = true}.Start();
 			} else
 				_probe = new Probe(endPoint);
 
-			new Pacemaker(endPoint).Activate();
+			(_pacemaker = new Pacemaker(endPoint)).Activate();
 		}
 
+		/// <summary>
+		/// 	探针刷新到界面显示
+		/// </summary>
+		/// <param name="timeout">超时时间</param>
 		public void Refresh(TimeSpan timeout)
 			=> _view.Group = _probe[timeout].ToList();
 
 		private void ProbeView_OnUnloaded(object sender, RoutedEventArgs e)
 			=> _running = false;
 
-		private void Button_Click(object sender, RoutedEventArgs e)
+		private void Refresh_Click(object sender, RoutedEventArgs e)
+			=> _pacemaker?.Activate();
+
+		private void Close_Click(object sender, RoutedEventArgs e)
 			=> CloseButtonClick();
 
 		private class ViewModel : INotifyPropertyChanged {

@@ -21,6 +21,7 @@ namespace MonitorTool.Source {
 		public TopicReceiver Receiver  { get; } = new TopicReceiver();
 
 		public void SetEndPoint(IPEndPoint endPoint) {
+			if (RemoteHub != null) return;
 			RemoteHub = new RemoteHub
 				(name: nameof(MonitorTool),
 				 group: endPoint,

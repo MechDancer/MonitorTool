@@ -119,6 +119,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+      <Compile Include="Controls\ColorStruct.cs"/>
+      <Compile Include="Controls\GraphicView.xaml.cs">
+          <DependentUpon>GraphicView.xaml</DependentUpon>
+      </Compile>
     <Compile Include="Controls\GroupSelector.xaml.cs">
       <DependentUpon>GroupSelector.xaml</DependentUpon>
     </Compile>
@@ -128,6 +132,9 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+      <Compile Include="Pages\GraphicPage.xaml.cs">
+          <DependentUpon>GraphicPage.xaml</DependentUpon>
+      </Compile>
     <Compile Include="Pages\ProbePage.xaml.cs">
       <DependentUpon>ProbePage.xaml</DependentUpon>
     </Compile>
@@ -215,6 +222,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+      <Page Include="Controls\GraphicView.xaml">
+          <SubType>Designer</SubType>
+          <Generator>MSBuild:Compile</Generator>
+      </Page>
     <Page Include="Controls\GroupSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -227,6 +238,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+      <Page Include="Pages\GraphicPage.xaml">
+          <SubType>Designer</SubType>
+          <Generator>MSBuild:Compile</Generator>
+      </Page>
     <Page Include="Pages\ProbePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -246,6 +261,9 @@
     </PackageReference>
       <PackageReference Include="System.Threading.Tasks.Dataflow">
           <Version>4.10.0-preview.18571.3</Version>
+      </PackageReference>
+      <PackageReference Include="Win2D.uwp">
+          <Version>1.23.0</Version>
       </PackageReference>
   </ItemGroup>
   <ItemGroup>
