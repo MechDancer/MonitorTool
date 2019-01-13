@@ -9,6 +9,8 @@ namespace MonitorTool.Controls {
 		public event ButtonClickHandler ButtonClick;
 
 		private void Done_OnClick(object sender, RoutedEventArgs e) {
+			var topic = Topic.Text;
+			if (string.IsNullOrWhiteSpace(topic)) return;
 			if (!ButtonClick?.Invoke(Topic.Text) ?? true) return;
 			AddButton.Visibility = Visibility.Visible;
 			Topic.Text           = "";

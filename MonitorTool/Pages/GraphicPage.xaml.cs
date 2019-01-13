@@ -21,8 +21,8 @@ namespace MonitorTool.Pages {
 				list1.Add(new Vector2(random.Next(400), random.Next(400)));
 			}
 
-			graphic.Content["sample0"] = (Colors.Aqua, list0);
-			graphic.Content["sample1"] = (Colors.Orange, list1);
+			graphic.Points["sample0"] = (Colors.Aqua, list0);
+			graphic.Points["sample1"] = (Colors.Orange, list1);
 
 			var item = new PivotItem {Header = topic, Content = graphic};
 			Pivot.Items?.Add(item);

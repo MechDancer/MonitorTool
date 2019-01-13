@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -7,7 +8,7 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
-		public readonly Dictionary<string, (Color, List<Vector2>)> Content
+		public readonly Dictionary<string, (Color, List<Vector2>)> Points
 			= new Dictionary<string, (Color, List<Vector2>)>();
 
 		public bool Connection   = false;
@@ -16,6 +17,7 @@ namespace MonitorTool.Controls {
 		public (Vector2, Vector2) Range = (Vector2.Zero, Vector2.Zero);
 
 		public GraphicView() => InitializeComponent();
+		public void Update() => Canvas2D.Invalidate();
 
 		private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
 			var (p0, p1) = Range;
@@ -41,7 +43,7 @@ namespace MonitorTool.Controls {
 										 })
 				args.DrawingSession.DrawLine(Transform(a), Transform(b), Colors.Azure, 3);
 
-			foreach (var (_, (color, list)) in Content) {
+			foreach (var (_, (color, list)) in Points) {
 				Vector2? last = null;
 				foreach (var p in list) {
 					var onCanvas = Transform(p);
@@ -56,8 +58,22 @@ namespace MonitorTool.Controls {
 		}
 
 		private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
-			Canvas.RemoveFromVisualTree();
-			Canvas = null;
+			Canvas2D.RemoveFromVisualTree();
+			Canvas2D = null;
+		}
+
+		private async void ColorPick_OnClick(object sender, RoutedEventArgs e) {
+			var dialog = new ColorDialog
+				((from it in Points
+				  select new ColorItem {Name = it.Key, Color = it.Value.Item1}
+				 ).ToList());
+			dialog.ButtonClick +=
+				colors => {
+					foreach (var colorItem in colors)
+						Points[colorItem.Name] = (colorItem.Color, Points[colorItem.Name].Item2);
+					Canvas2D.Invalidate();
+				};
+			await dialog.ShowAsync();
 		}
 	}
 }

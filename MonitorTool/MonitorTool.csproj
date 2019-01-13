@@ -119,6 +119,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+      <Compile Include="Controls\ColorDialog.xaml.cs">
+          <DependentUpon>ColorDialog.xaml</DependentUpon>
+      </Compile>
+      <Compile Include="Controls\ColorItem.cs"/>
       <Compile Include="Controls\GraphicView.xaml.cs">
           <DependentUpon>GraphicView.xaml</DependentUpon>
       </Compile>
@@ -147,6 +151,7 @@
           <DependentUpon>TopicPage.xaml</DependentUpon>
       </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+      <Compile Include="Source\BindableBase.cs"/>
       <Compile Include="Source\Hub.cs"/>
       <Compile Include="Source\TopicReceiver.cs"/>
   </ItemGroup>
@@ -224,6 +229,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+      <Page Include="Controls\ColorDialog.xaml">
+          <SubType>Designer</SubType>
+          <Generator>MSBuild:Compile</Generator>
+      </Page>
       <Page Include="Controls\GraphicView.xaml">
           <SubType>Designer</SubType>
           <Generator>MSBuild:Compile</Generator>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -9,6 +8,7 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using MechDancer.Common;
 using MechDancer.Framework.Net.Presets;
+using MonitorTool.Source;
 
 namespace MonitorTool.Controls {
 	/// <inheritdoc cref="Windows.UI.Xaml.Controls.UserControl" />
@@ -61,7 +61,7 @@ namespace MonitorTool.Controls {
 		private void Close_Click(object sender, RoutedEventArgs e)
 			=> CloseButtonClick();
 
-		private class ViewModel : INotifyPropertyChanged {
+		private class ViewModel : BindableBase {
 			private readonly ObservableCollection<string> _group
 				= new ObservableCollection<string>();
 
@@ -69,21 +69,13 @@ namespace MonitorTool.Controls {
 
 			public string Header {
 				get => _header;
-				set {
-					_header = value;
-					Notify(nameof(Header));
-				}
+				set => SetProperty(ref _header, value);
 			}
 
 			public ICollection<string> Group {
 				get => _group;
 				set => _group.Sync(value);
 			}
-
-			public event PropertyChangedEventHandler PropertyChanged;
-
-			private void Notify(string name)
-				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 	}
 }

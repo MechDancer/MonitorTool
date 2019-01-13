@@ -16,13 +16,13 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{x:Bind Path=_view.Header,Mode=OneWay}" FontSize="18"
+        <TextBlock Text="{x:Bind _view.Header, Mode=OneWay}" FontSize="18"
                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
-        <ListView ItemsSource="{x:Bind Path=_view.Group, Mode=OneWay}"
+        <ListView ItemsSource="{x:Bind _view.Group, Mode=OneWay}"
                   SelectionMode="None"
                   Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
         <Button Background="Yellow" Opacity="0.5" Click="Refresh_Click"
-                Content="&#xE72C;" FontFamily="Segoe MDL2 Assets"
+                Content="&#xE890;" FontFamily="Segoe MDL2 Assets"
                 HorizontalAlignment="Stretch" Margin="0,0,8,0"
                 Grid.Row="2" Grid.Column="0" />
         <Button Background="Red" Opacity="0.5" Click="Close_Click"

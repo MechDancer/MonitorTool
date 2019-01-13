@@ -23,8 +23,11 @@ namespace MonitorTool.Pages {
 							  root = new TreeViewNode {
 														  Content = sender,
 														  Children = {
-																		 new TreeViewNode
-																		 {Content = payload.ReadEnd()}
+																		 new TreeViewNode {
+																							  Content =
+																								  payload
+																									 .ReadEnd()
+																						  }
 																	 }
 													  };
 							  TopicView.RootNodes.Add(root);
@@ -34,8 +37,10 @@ namespace MonitorTool.Pages {
 								  root.Children.Add(new TreeViewNode {Content = topic});
 						  }
 					  },
-					  new ExecutionDataflowBlockOptions
-					  {TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext()}
+					  new ExecutionDataflowBlockOptions {
+															TaskScheduler = TaskScheduler
+															   .FromCurrentSynchronizationContext()
+														}
 					 ));
 		}
 

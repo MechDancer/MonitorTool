@@ -11,5 +11,16 @@
              d:DesignWidth="400"
              Unloaded="GraphicView_OnUnloaded">
 
-    <canvas:CanvasControl Name="Canvas" Draw="CanvasControl_OnDraw" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw" />
+        <Button Content="&#xE790;" FontFamily="Segoe MDL2 Assets" Click="ColorPick_OnClick"
+                Background="Orange" Foreground="Black"
+                Width="36" Height="36" Margin="12"
+                VerticalAlignment="Top" HorizontalAlignment="Right"
+                Grid.Column="1" />
+    </Grid>
 </UserControl>
