@@ -9,14 +9,6 @@ namespace MonitorTool.Pages {
 
 		public SettingsPage() => InitializeComponent();
 
-		private string Get(string key, string @default)
-			=> _settings.TryGetValue(key, out var data) ? data.ToString() : @default;
-
-		private void Set<T>(string key, string value, Func<string, (bool, T)> func) {
-			var (success, data) = func(value);
-			if (success) _settings[key] = data;
-		}
-
 		private string Ip0 {
 			get => Get(nameof(Ip0), "0");
 			set => Set(nameof(Ip0), value, data => (byte.TryParse(data, out var num), num));
@@ -40,6 +32,14 @@ namespace MonitorTool.Pages {
 		private string Port {
 			get => Get(nameof(Port), "0");
 			set => Set(nameof(Port), value, data => (ushort.TryParse(data, out var num), num));
+		}
+
+		private string Get(string key, string @default)
+			=> _settings.TryGetValue(key, out var data) ? data.ToString() : @default;
+
+		private void Set<T>(string key, string value, Func<string, (bool, T)> func) {
+			var (success, data) = func(value);
+			if (success) _settings[key] = data;
 		}
 	}
 }

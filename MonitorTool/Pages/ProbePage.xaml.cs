@@ -1,18 +1,19 @@
-﻿using MechDancer.Common;
-using MonitorTool.Controls;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.UI.Xaml;
+using Windows.UI.Xaml.Navigation;
+using MechDancer.Common;
+using MonitorTool.Controls;
 using static Windows.UI.Core.CoreDispatcherPriority;
 
 namespace MonitorTool.Pages {
 	public sealed partial class ProbePage {
 		private bool _running = true;
 
-		public ProbePage() {
-			InitializeComponent();
+		public ProbePage() => InitializeComponent();
+
+		protected override void OnNavigatedTo(NavigationEventArgs e) {
 			View.Dispatcher.RunAsync
 				(Low, async () => {
 						  while (_running) {
@@ -39,7 +40,7 @@ namespace MonitorTool.Pages {
 				};
 		}
 
-		private void Page_Unloaded(object sender, RoutedEventArgs e)
+		protected override void OnNavigatedFrom(NavigationEventArgs e)
 			=> _running = false;
 	}
 }

@@ -3,13 +3,11 @@ using Windows.UI.Xaml;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GroupSelector {
-		public GroupSelector() {
-			InitializeComponent();
-		}
-
 		public delegate bool ButtonClickHandler(IPEndPoint group);
 
 		public ButtonClickHandler ButtonClick;
+
+		public GroupSelector() => InitializeComponent();
 
 		private void Done_OnClick(object sender, RoutedEventArgs e) {
 			if (!IPAddress.TryParse(Ip.Text, out var ip)) return;

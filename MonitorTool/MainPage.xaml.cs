@@ -6,6 +6,7 @@ using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using MechDancer.Framework.Net.Presets;
 using MonitorTool.Pages;
+using Hub = MonitorTool.Source.Hub;
 
 namespace MonitorTool {
 	public sealed partial class MainPage {
