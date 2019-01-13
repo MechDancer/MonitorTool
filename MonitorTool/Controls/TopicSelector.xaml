@@ -1,0 +1,35 @@
+﻿<UserControl
+    x:Class="MonitorTool.Controls.TopicSelector"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+   Height="200"
+    Width="200">
+
+    <Grid Padding="12">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TextBox Name="Topic" VerticalAlignment="Center"  Margin="12"
+                 Grid.ColumnSpan="2"/>
+        <Button Content="确定" Click="Done_OnClick" Margin="0,0,4,0"
+                Background="ForestGreen"
+                Grid.Row="1" Grid.Column="0"
+                HorizontalAlignment="Stretch" />
+        <Button Content="取消" Click="Cancel_OnClick" Margin="4,0,0,0"
+                Grid.Row="1" Grid.Column="1"
+                HorizontalAlignment="Stretch" />
+
+        <Button Name="AddButton" Content="&#xE710;" Click="ButtonBase_OnClick"
+                Background="Black" Opacity=".9"
+                FontFamily="Segoe MDL2 Assets" FontSize="40"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Grid.Row="0" Grid.Column="0"
+                Grid.RowSpan="2" Grid.ColumnSpan="2" />
+    </Grid>
+</UserControl>

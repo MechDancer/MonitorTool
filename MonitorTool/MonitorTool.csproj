@@ -119,7 +119,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-      <Compile Include="Controls\ColorStruct.cs"/>
       <Compile Include="Controls\GraphicView.xaml.cs">
           <DependentUpon>GraphicView.xaml</DependentUpon>
       </Compile>
@@ -129,6 +128,9 @@
     <Compile Include="Controls\ProbeView.xaml.cs">
       <DependentUpon>ProbeView.xaml</DependentUpon>
     </Compile>
+      <Compile Include="Controls\TopicSelector.xaml.cs">
+          <DependentUpon>TopicSelector.xaml</DependentUpon>
+      </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -231,9 +233,13 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ProbeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+        <SubType>Designer</SubType>
+        <Generator>MSBuild:Compile</Generator>
     </Page>
+      <Page Include="Controls\TopicSelector.xaml">
+          <SubType>Designer</SubType>
+          <Generator>MSBuild:Compile</Generator>
+      </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

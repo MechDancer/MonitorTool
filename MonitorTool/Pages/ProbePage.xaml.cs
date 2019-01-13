@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Navigation;
 using MechDancer.Common;
@@ -14,7 +15,8 @@ namespace MonitorTool.Pages {
 		private static readonly HashSet<IPEndPoint> Memory
 			= new HashSet<IPEndPoint>();
 
-		private bool _running = true;
+		private readonly CancellationTokenSource _cancel
+			= new CancellationTokenSource();
 
 		public ProbePage() => InitializeComponent();
 
@@ -22,8 +24,11 @@ namespace MonitorTool.Pages {
 			View.Dispatcher.RunAsync
 				(Low, async () => {
 						  foreach (var group in Memory) Add(group);
-						  while (_running) {
-							  await Task.Delay(500);
+						  while (!_cancel.IsCancellationRequested) {
+							  try {
+								  await Task.Delay(500, _cancel.Token);
+							  } catch (TaskCanceledException) { }
+
 							  foreach (var view in View.Items?.OfType<ProbeView>()
 												?? new ProbeView[] { })
 								  view.Refresh(TimeSpan.FromSeconds(1));
@@ -35,7 +40,7 @@ namespace MonitorTool.Pages {
 		}
 
 		protected override void OnNavigatedFrom(NavigationEventArgs e)
-			=> _running = false;
+			=> _cancel.Cancel();
 
 		private void Add(IPEndPoint group) {
 			Debug.Assert(View.Items != null, "View.Items != null");

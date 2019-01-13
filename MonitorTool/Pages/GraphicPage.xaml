@@ -1,14 +1,15 @@
-﻿<Page
-    x:Class="MonitorTool.Pages.GraphicPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+﻿<Page Padding="12"
+      x:Class="MonitorTool.Pages.GraphicPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="using:MonitorTool.Controls"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Pivot>
+    <Pivot Name="Pivot">
         <PivotItem Header="总览">
-            <GridView>
+            <GridView Name="GridView">
                 <GridView.Items>
-
+                    <controls:TopicSelector ButtonClick="TopicSelector_OnButtonClick" />
                 </GridView.Items>
             </GridView>
         </PivotItem>

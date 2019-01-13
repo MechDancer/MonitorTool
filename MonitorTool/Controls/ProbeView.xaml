@@ -10,7 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="48" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -19,6 +19,7 @@
         <TextBlock Text="{x:Bind Path=_view.Header,Mode=OneWay}" FontSize="18"
                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
         <ListView ItemsSource="{x:Bind Path=_view.Group, Mode=OneWay}"
+                  SelectionMode="None"
                   Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
         <Button Background="Yellow" Opacity="0.5" Click="Refresh_Click"
                 Content="&#xE72C;" FontFamily="Segoe MDL2 Assets"
