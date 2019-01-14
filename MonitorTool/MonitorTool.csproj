@@ -119,9 +119,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-      <Compile Include="Controls\ColorDialog.xaml.cs">
-          <DependentUpon>ColorDialog.xaml</DependentUpon>
-      </Compile>
       <Compile Include="Controls\ColorItem.cs"/>
       <Compile Include="Controls\GraphicView.xaml.cs">
           <DependentUpon>GraphicView.xaml</DependentUpon>
@@ -209,13 +206,10 @@
       <Content Include="Assets\Wide310x150Logo.scale-400.png"/>
     <Content Include="Library\Common.deps.json" />
     <Content Include="Library\Common.dll" />
-    <Content Include="Library\Common.pdb" />
     <Content Include="Library\Dependency.deps.json" />
     <Content Include="Library\Dependency.dll" />
-    <Content Include="Library\Dependency.pdb" />
     <Content Include="Library\Remote.deps.json" />
     <Content Include="Library\Remote.dll" />
-    <Content Include="Library\Remote.pdb" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -229,10 +223,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-      <Page Include="Controls\ColorDialog.xaml">
-          <SubType>Designer</SubType>
-          <Generator>MSBuild:Compile</Generator>
-      </Page>
       <Page Include="Controls\GraphicView.xaml">
           <SubType>Designer</SubType>
           <Generator>MSBuild:Compile</Generator>

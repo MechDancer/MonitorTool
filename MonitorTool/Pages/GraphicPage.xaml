@@ -7,7 +7,7 @@
 
     <Pivot Name="Pivot">
         <PivotItem Header="总览">
-            <GridView Name="GridView">
+            <GridView Name="GridView" SelectionChanged="GridView_OnSelectionChanged">
                 <GridView.Items>
                     <controls:TopicSelector ButtonClick="TopicSelector_OnButtonClick" />
                 </GridView.Items>

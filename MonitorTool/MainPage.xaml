@@ -14,7 +14,7 @@
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
             <NavigationViewItem Icon="Mail" Content="话题监视" />
-            <NavigationViewItem Content="画图">
+            <NavigationViewItem Content="绘图">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE9D2;" />
                 </NavigationViewItem.Icon>

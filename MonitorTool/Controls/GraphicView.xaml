@@ -7,20 +7,75 @@
              xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
              xmlns:local="using:MonitorTool.Controls"
              mc:Ignorable="d"
-             d:DesignHeight="300"
-             d:DesignWidth="400"
+             d:DesignHeight="400"
+             d:DesignWidth="600"
              Unloaded="GraphicView_OnUnloaded">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="ColorTemplate" x:DataType="local:ColorItem">
+            <StackPanel Orientation="Horizontal">
+                <Button Background="{x:Bind local:ColorItem.ToBrush(Color), Mode=OneWay}"
+                        Width="32" Height="32" Margin="12,4">
+                    <Button.Flyout>
+                        <Flyout>
+                            <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
+                                         IsAlphaEnabled="True" />
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="48" />
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw" />
-        <Button Content="&#xE790;" FontFamily="Segoe MDL2 Assets" Click="ColorPick_OnClick"
-                Background="Orange" Foreground="Black"
-                Width="36" Height="36" Margin="12"
-                VerticalAlignment="Top" HorizontalAlignment="Right"
-                Grid.Column="1" />
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Name="Y1Text"
+                   Grid.Row="0" Grid.Column="0" Margin="8"
+                   HorizontalAlignment="Right" VerticalAlignment="Top" />
+        <TextBlock Name="Y0Text"
+                   Grid.Row="0" Grid.Column="0" Margin="8"
+                   HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+        <TextBlock Name="X0Text"
+                   Grid.Row="1" Grid.Column="1" Margin="8"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <TextBlock Name="X1Text"
+                   Grid.Row="1" Grid.Column="1" Margin="8"
+                   HorizontalAlignment="Right" VerticalAlignment="Top" />
+
+        <Border BorderBrush="SteelBlue" BorderThickness="1"
+                Grid.Row="0" Grid.Column="1">
+            <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw" />
+        </Border>
+
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">
+            <CheckBox Content="连线" MinWidth="0"
+                      IsChecked="{x:Bind ViewModelContext.Connection, Mode=TwoWay}" />
+            <CheckBox Content="保持比例" MinWidth="0"
+                      IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
+            <Button Content="背景"
+                    Background="{x:Bind local:ColorItem.ToBrush(ViewModelContext.Background), Mode=OneWay}"
+                    HorizontalAlignment="Stretch" Margin="0,8">
+                <Button.Flyout>
+                    <Flyout>
+                        <ColorPicker Color="{x:Bind ViewModelContext.Background, Mode=TwoWay}"
+                                     IsAlphaEnabled="True" />
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <ListView Name="MainList" Header="图例"
+                      ItemTemplate="{StaticResource ColorTemplate}"
+                      SelectionChanged="MainList_OnSelectionChanged"
+                      Margin="0,12" SelectionMode="Multiple" />
+        </StackPanel>
     </Grid>
 </UserControl>
