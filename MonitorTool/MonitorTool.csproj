@@ -123,6 +123,7 @@
       <Compile Include="Controls\GraphicView.xaml.cs">
           <DependentUpon>GraphicView.xaml</DependentUpon>
       </Compile>
+      <Compile Include="Controls\GraphicViewModel.cs"/>
     <Compile Include="Controls\GroupSelector.xaml.cs">
       <DependentUpon>GroupSelector.xaml</DependentUpon>
     </Compile>

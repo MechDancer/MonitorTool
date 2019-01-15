@@ -37,8 +37,8 @@ namespace MonitorTool.Controls {
 			if (_probe == null) {
 				_probe = new Probe(endPoint);
 				new Thread(() => {
-							   while (_running) _probe.Invoke();
-						   }) {IsBackground = true}.Start();
+					           while (_running) _probe.Invoke();
+				           }) {IsBackground = true}.Start();
 			} else
 				_probe = new Probe(endPoint);
 

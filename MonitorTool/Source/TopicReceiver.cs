@@ -11,7 +11,7 @@ namespace MonitorTool.Source {
 	/// 	话题接收者
 	/// </summary>
 	public class TopicReceiver : UniqueComponent<TopicReceiver>,
-								 IMulticastListener {
+	                             IMulticastListener {
 		private static readonly byte[] InterestSet = {(byte) UdpCmd.TopicMessage};
 
 		public readonly BroadcastBlock<(string, Stream)> Port

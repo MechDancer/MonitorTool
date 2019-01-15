@@ -54,20 +54,28 @@
 
         <Border BorderBrush="SteelBlue" BorderThickness="1"
                 Grid.Row="0" Grid.Column="1">
-            <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw" />
+            <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw"
+                                  PointerPressed="Canvas2D_OnPointerPressed"
+                                  PointerMoved="Canvas2D_OnPointerMoved"
+                                  PointerReleased="Canvas2D_OnPointerReleased"
+                                  PointerExited="Canvas2D_OnPointerCanceled"
+                                  PointerCanceled="Canvas2D_OnPointerCanceled"
+                                  PointerCaptureLost="Canvas2D_OnPointerCanceled" />
         </Border>
 
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">
             <CheckBox Content="连线" MinWidth="0"
-                      IsChecked="{x:Bind ViewModelContext.Connection, Mode=TwoWay}" />
+                      IsChecked="{x:Bind _viewModelContext.Connection, Mode=TwoWay}" />
             <CheckBox Content="保持比例" MinWidth="0"
-                      IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
+                      IsChecked="{x:Bind _viewModelContext.Proportional, Mode=TwoWay}" />
+            <ToggleButton Content="自动范围" IsChecked="{x:Bind _viewModelContext.AutoRange, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" Margin="0,4" />
             <Button Content="背景"
-                    Background="{x:Bind local:ColorItem.ToBrush(ViewModelContext.Background), Mode=OneWay}"
-                    HorizontalAlignment="Stretch" Margin="0,8">
+                    Background="{x:Bind local:ColorItem.ToBrush(_viewModelContext.Background), Mode=OneWay}"
+                    HorizontalAlignment="Stretch" Margin="0,4">
                 <Button.Flyout>
                     <Flyout>
-                        <ColorPicker Color="{x:Bind ViewModelContext.Background, Mode=TwoWay}"
+                        <ColorPicker Color="{x:Bind _viewModelContext.Background, Mode=TwoWay}"
                                      IsAlphaEnabled="True" />
                     </Flyout>
                 </Button.Flyout>
@@ -75,7 +83,7 @@
             <ListView Name="MainList" Header="图例"
                       ItemTemplate="{StaticResource ColorTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
-                      Margin="0,12" SelectionMode="Multiple" />
+                      Margin="0,4" SelectionMode="Multiple" />
         </StackPanel>
     </Grid>
 </UserControl>

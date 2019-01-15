@@ -3,26 +3,18 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using MechDancer.Common;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using MonitorTool.Source;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
-		private readonly Dictionary<string, Color> _colors
-			= new Dictionary<string, Color>();
-
 		public readonly Dictionary<string, List<Vector2>> Points
 			= new Dictionary<string, List<Vector2>>();
-
-		public readonly ViewModel ViewModelContext;
-
-		public GraphicView() {
-			InitializeComponent();
-			ViewModelContext = new ViewModel(Canvas2D);
-		}
 
 		/// <summary>
 		/// 	设置颜色
@@ -50,51 +42,134 @@ namespace MonitorTool.Controls {
 			}
 		}
 
+		/// <summary>
+		/// 	自动调整范围
+		/// </summary>
+		public bool AutoRange {
+			get => _viewModelContext.AutoRange;
+			set => _viewModelContext.AutoRange = value;
+		}
+
+		/// <summary>
+		/// 	设置最小绘图范围
+		/// </summary>
 		public (Vector2, Vector2) Range {
-			get => (new Vector2(ViewModelContext.X0, ViewModelContext.Y0),
-			        new Vector2(ViewModelContext.X1, ViewModelContext.Y1));
-			set {
-				ViewModelContext.X0 = value.Item1.X;
-				ViewModelContext.Y0 = value.Item1.Y;
-				ViewModelContext.X1 = value.Item2.X;
-				ViewModelContext.Y1 = value.Item2.Y;
+			get => _viewModelContext.Range;
+			set => _viewModelContext.Range = value;
+		}
+
+		/// <summary>
+		/// 	连线
+		/// </summary>
+		public bool Connection {
+			get => _viewModelContext.Connection;
+			set => _viewModelContext.Connection = value;
+		}
+
+		/// <summary>
+		/// 	保持比例
+		/// </summary>
+		public bool Proportional {
+			get => _viewModelContext.Proportional;
+			set => _viewModelContext.Proportional = value;
+		}
+
+		/// <summary>
+		/// 	强制重新画图
+		/// </summary>
+		public void Update() => Canvas2D.Invalidate();
+
+		#region Never Mind
+
+		private readonly ViewModel                 _viewModelContext;
+		private readonly Dictionary<string, Color> _colors = new Dictionary<string, Color>();
+
+		private RerangeState _state = RerangeState.Idle;
+		private Point        _origin, _current;
+
+		public GraphicView() {
+			InitializeComponent();
+			_viewModelContext = new ViewModel(Canvas2D);
+		}
+
+		private (Vector2, Vector2) CalculateRange() {
+			var x0 = float.MaxValue;
+			var y0 = float.MaxValue;
+			var x1 = float.MinValue;
+			var y1 = float.MinValue;
+			foreach (var list in Points.Values)
+			foreach (var vector2 in list) {
+				if (vector2.X      < x0) x0 = vector2.X;
+				else if (vector2.X > x1) x1 = vector2.X;
+				if (vector2.Y      < y0) y0 = vector2.Y;
+				else if (vector2.Y > y1) y1 = vector2.Y;
+			}
+
+			return (new Vector2(x0, y0), new Vector2(x1, y1));
+		}
+
+		private static void Order(double    a,
+		                          double    b,
+		                          out float min,
+		                          out float max) {
+			if (a < b) {
+				min = (float) a;
+				max = (float) b;
+			} else {
+				min = (float) b;
+				max = (float) a;
 			}
 		}
 
-		public void Update() => Canvas2D.Invalidate();
-
 		private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
-			sender.ClearColor = ViewModelContext.Background;
+			// 修改背景色
+			sender.ClearColor = _viewModelContext.Background;
 
-			var (p0, p1) = Range;
+			// 自动范围
+			if (AutoRange) Range = CalculateRange();
+
+			// 保存参数
 			var width  = (float) sender.ActualWidth;
 			var height = (float) sender.ActualHeight;
-			var size   = p1 - p0;
-			var kX     = width  / size.X;
-			var kY     = height / size.Y;
+			var (p0, p1) = Range;
+			_viewModelContext.BuildTransform(p0, p1, out var transform, out var reverse);
 
-			var c0 = (p0 + p1)                  / 2;
-			var c1 = new Vector2(width, height) / 2;
+			// 计算范围
+			switch (_state) {
+				case RerangeState.Idle:
+					break;
+				case RerangeState.Reset:
+					args.DrawingSession
+					    .DrawRoundedRectangle(new Rect(_origin, _current), 0, 0, Colors.White);
+					break;
+				case RerangeState.Done:
+					if (new Rect(_origin, _current).Let(it => it.Width * it.Height) < 10000)
+						break;
 
-			if (ViewModelContext.Proportional) kX = kY = Math.Min(kX, kY);
-
-			{
-				Vector2 Reverse(Vector2 origin) {
-					var move = origin - c1;
-					return new Vector2(move.X / kX, move.Y / -kY) + c0;
-				}
-
-				var tp0 = Reverse(new Vector2(0,     height));
-				var tp1 = Reverse(new Vector2(width, 0));
-				X0Text.Text = ((int) tp0.X).ToString(CultureInfo.CurrentCulture);
-				X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
-				Y0Text.Text = ((int) tp0.Y).ToString(CultureInfo.CurrentCulture);
-				Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
+					_state    = RerangeState.Idle;
+					AutoRange = false;
+					Order(_origin.X, _current.X, out var x0, out var x1);
+					Order(_origin.Y, _current.Y, out var y0, out var y1);
+					var tp0 = reverse(new Vector2(x0, y1));
+					var tp1 = reverse(new Vector2(x1, y0));
+					_viewModelContext.X0 = tp0.X;
+					_viewModelContext.X1 = tp1.X;
+					_viewModelContext.Y0 = tp0.Y;
+					_viewModelContext.Y1 = tp1.Y;
+					_viewModelContext.BuildTransform(Range.Item1, Range.Item2, out transform, out reverse);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 
-			Vector2 Transform(Vector2 origin) {
-				var move = origin - c0;
-				return new Vector2(kX * move.X, -kY * move.Y) + c1;
+			{
+				var tp0 = reverse(new Vector2(0, height));
+				X0Text.Text = ((int) tp0.X).ToString(CultureInfo.CurrentCulture);
+				Y0Text.Text = ((int) tp0.Y).ToString(CultureInfo.CurrentCulture);
+
+				var tp1 = reverse(new Vector2(width, 0));
+				X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
+				Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
 			}
 
 			var random = new Random();
@@ -105,15 +180,16 @@ namespace MonitorTool.Controls {
 					this[name] = Color.FromArgb(255, buffer[0], buffer[1], buffer[2]);
 				}
 
+			var r       = (int) Math.Min(width, height) / 400 + 2;
 			var visible = MainList.SelectedItems.OfType<ColorItem>().Select(it => it.Name);
 			foreach (var (name, list) in Points.Where(it => visible.Contains(it.Key))) {
 				Vector2? last  = null;
 				var      color = _colors[name];
 				foreach (var p in list) {
-					var onCanvas = Transform(p);
-					args.DrawingSession.FillCircle(onCanvas, 4, color);
+					var onCanvas = transform(p);
+					args.DrawingSession.FillCircle(onCanvas, r, color);
 
-					if (last != null && ViewModelContext.Connection)
+					if (last != null && _viewModelContext.Connection)
 						args.DrawingSession.DrawLine(last.Value, onCanvas, color, 1);
 
 					last = onCanvas;
@@ -129,60 +205,30 @@ namespace MonitorTool.Controls {
 		private void MainList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 			=> Canvas2D.Invalidate();
 
-		public class ViewModel : BindableBase {
-			private readonly CanvasControl _canvas;
-			private          Color         _background = Colors.Transparent;
-			private          bool          _connection;
-			private          bool          _proportional = true;
-
-			private float _x0, _x1, _y0, _y1;
-
-			public ViewModel(CanvasControl canvas)
-				=> _canvas = canvas;
-
-			public bool Connection {
-				get => _connection;
-				set {
-					if (SetProperty(ref _connection, value))
-						_canvas.Invalidate();
-				}
-			}
-
-			public bool Proportional {
-				get => _proportional;
-				set {
-					if (SetProperty(ref _proportional, value))
-						_canvas.Invalidate();
-				}
-			}
-
-			public Color Background {
-				get => _background;
-				set {
-					if (SetProperty(ref _background, value))
-						_canvas.ClearColor = value;
-				}
-			}
-
-			public float X0 {
-				get => _x0;
-				set => SetProperty(ref _x0, value);
-			}
-
-			public float X1 {
-				get => _x1;
-				set => SetProperty(ref _x1, value);
-			}
-
-			public float Y0 {
-				get => _y0;
-				set => SetProperty(ref _y0, value);
-			}
-
-			public float Y1 {
-				get => _y1;
-				set => SetProperty(ref _y1, value);
-			}
+		private void Canvas2D_OnPointerPressed(object sender, PointerRoutedEventArgs e) {
+			_state  = RerangeState.Reset;
+			_origin = e.GetCurrentPoint(Canvas2D).Position;
 		}
+
+		private void Canvas2D_OnPointerMoved(object sender, PointerRoutedEventArgs e) {
+			_current = e.GetCurrentPoint(Canvas2D).Position;
+			if (_state == RerangeState.Reset) Canvas2D.Invalidate();
+		}
+
+		private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e)
+			=> _state = RerangeState.Idle;
+
+		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
+			_state = RerangeState.Done;
+			Canvas2D.Invalidate();
+		}
+
+		private enum RerangeState : byte {
+			Idle,
+			Reset,
+			Done
+		}
+
+		#endregion
 	}
 }

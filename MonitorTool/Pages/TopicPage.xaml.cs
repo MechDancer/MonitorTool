@@ -21,15 +21,15 @@ namespace MonitorTool.Pages {
 						  var root = TopicView.RootNodes.SingleOrDefault(x => (string) x.Content == sender);
 						  if (root == null) {
 							  root = new TreeViewNode {
-														  Content = sender,
-														  Children = {
-																		 new TreeViewNode {
-																							  Content =
-																								  payload
-																									 .ReadEnd()
-																						  }
-																	 }
-													  };
+								                          Content = sender,
+								                          Children = {
+									                                     new TreeViewNode {
+										                                                      Content =
+											                                                      payload
+												                                                     .ReadEnd()
+									                                                      }
+								                                     }
+							                          };
 							  TopicView.RootNodes.Add(root);
 						  } else {
 							  var topic = payload.ReadEnd();
@@ -38,9 +38,9 @@ namespace MonitorTool.Pages {
 						  }
 					  },
 					  new ExecutionDataflowBlockOptions {
-															TaskScheduler = TaskScheduler
-															   .FromCurrentSynchronizationContext()
-														}
+						                                    TaskScheduler = TaskScheduler
+							                                   .FromCurrentSynchronizationContext()
+					                                    }
 					 ));
 		}
 
