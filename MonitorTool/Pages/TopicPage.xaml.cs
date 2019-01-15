@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -15,32 +14,23 @@ namespace MonitorTool.Pages {
 
 		protected override void OnNavigatedTo(NavigationEventArgs e) {
 			_link = Hub.Instance.Receiver.Port.LinkTo
-				(new ActionBlock<(string, Stream)>
+				(new ActionBlock<(string, string, byte[])>
 					 (it => {
-						  var (sender, payload) = it;
+						  var (sender, topic, _) = it;
 						  var root = TopicView.RootNodes.SingleOrDefault(x => (string) x.Content == sender);
 						  if (root == null) {
 							  root = new TreeViewNode {
-								                          Content = sender,
-								                          Children = {
-									                                     new TreeViewNode {
-										                                                      Content =
-											                                                      payload
-												                                                     .ReadEnd()
-									                                                      }
-								                                     }
-							                          };
+														  Content  = sender,
+														  Children = {new TreeViewNode {Content = topic}}
+													  };
 							  TopicView.RootNodes.Add(root);
-						  } else {
-							  var topic = payload.ReadEnd();
-							  if (root.Children.None(x => (string) x.Content == topic))
-								  root.Children.Add(new TreeViewNode {Content = topic});
-						  }
+						  } else if (root.Children.None(x => (string) x.Content == topic))
+							  root.Children.Add(new TreeViewNode {Content = topic});
 					  },
 					  new ExecutionDataflowBlockOptions {
-						                                    TaskScheduler = TaskScheduler
-							                                   .FromCurrentSynchronizationContext()
-					                                    }
+															TaskScheduler = TaskScheduler
+															   .FromCurrentSynchronizationContext()
+														}
 					 ));
 		}
 

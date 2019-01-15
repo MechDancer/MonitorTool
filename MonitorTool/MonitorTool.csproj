@@ -130,6 +130,7 @@
     <Compile Include="Controls\ProbeView.xaml.cs">
       <DependentUpon>ProbeView.xaml</DependentUpon>
     </Compile>
+      <Compile Include="Controls\TopicGraphicHelper.cs"/>
       <Compile Include="Controls\TopicSelector.xaml.cs">
           <DependentUpon>TopicSelector.xaml</DependentUpon>
       </Compile>
