@@ -86,10 +86,9 @@ namespace MonitorTool.Controls {
 				set => SetProperty(ref _y1, value);
 			}
 
-			public void BuildTransform(Vector2                    p0,
-			                           Vector2                    p1,
-			                           out Func<Vector2, Vector2> transform,
+			public void BuildTransform(out Func<Vector2, Vector2> transform,
 			                           out Func<Vector2, Vector2> reverse) {
+				var (p0, p1) = Range;
 				var width  = (float) _canvas.ActualWidth;
 				var height = (float) _canvas.ActualHeight;
 				var size   = p1 - p0;

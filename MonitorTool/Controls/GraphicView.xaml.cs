@@ -8,7 +8,6 @@ using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using MechDancer.Common;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace MonitorTool.Controls {
@@ -131,8 +130,7 @@ namespace MonitorTool.Controls {
 			// 保存参数
 			var width  = (float) sender.ActualWidth;
 			var height = (float) sender.ActualHeight;
-			var (p0, p1) = Range;
-			_viewModelContext.BuildTransform(p0, p1, out var transform, out var reverse);
+			_viewModelContext.BuildTransform(out var transform, out var reverse);
 
 			// 计算范围
 			switch (_state) {
@@ -143,20 +141,17 @@ namespace MonitorTool.Controls {
 					    .DrawRoundedRectangle(new Rect(_origin, _current), 0, 0, Colors.White);
 					break;
 				case RerangeState.Done:
-					if (new Rect(_origin, _current).Let(it => it.Width * it.Height) < 10000)
+					var rect = new Rect(_origin, _current);
+					if (rect.Height < 100 || rect.Width < 100)
 						break;
 
 					_state    = RerangeState.Idle;
 					AutoRange = false;
 					Order(_origin.X, _current.X, out var x0, out var x1);
 					Order(_origin.Y, _current.Y, out var y0, out var y1);
-					var tp0 = reverse(new Vector2(x0, y1));
-					var tp1 = reverse(new Vector2(x1, y0));
-					_viewModelContext.X0 = tp0.X;
-					_viewModelContext.X1 = tp1.X;
-					_viewModelContext.Y0 = tp0.Y;
-					_viewModelContext.Y1 = tp1.Y;
-					_viewModelContext.BuildTransform(Range.Item1, Range.Item2, out transform, out reverse);
+					_viewModelContext.Range = (reverse(new Vector2(x0, y1)),
+					                           reverse(new Vector2(x1, y0)));
+					_viewModelContext.BuildTransform(out transform, out reverse);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
