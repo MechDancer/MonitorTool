@@ -7,6 +7,8 @@ using MonitorTool.Source;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
+		private readonly ViewModel _viewModelContext;
+
 		private class ViewModel : BindableBase {
 			private readonly CanvasControl _canvas;
 			private          bool          _autoRange;
@@ -87,7 +89,7 @@ namespace MonitorTool.Controls {
 			}
 
 			public void BuildTransform(out Func<Vector2, Vector2> transform,
-			                           out Func<Vector2, Vector2> reverse) {
+									   out Func<Vector2, Vector2> reverse) {
 				var (p0, p1) = Range;
 				var width  = (float) _canvas.ActualWidth;
 				var height = (float) _canvas.ActualHeight;

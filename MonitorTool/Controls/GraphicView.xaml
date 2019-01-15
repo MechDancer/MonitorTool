@@ -60,7 +60,8 @@
                                   PointerReleased="Canvas2D_OnPointerReleased"
                                   PointerExited="Canvas2D_OnPointerCanceled"
                                   PointerCanceled="Canvas2D_OnPointerCanceled"
-                                  PointerCaptureLost="Canvas2D_OnPointerCanceled" />
+                                  PointerCaptureLost="Canvas2D_OnPointerCanceled" 
+                                  PointerWheelChanged="Canvas2D_OnPointerWheelChanged"/>
         </Border>
 
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">

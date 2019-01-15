@@ -8,6 +8,7 @@ using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using MechDancer.Common;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace MonitorTool.Controls {
@@ -22,17 +23,17 @@ namespace MonitorTool.Controls {
 		public Color this[string topic] {
 			set {
 				var item = (MainList.Items ?? throw new MemberAccessException())
-				          .OfType<ColorItem>()
-				          .SingleOrDefault(it => it.Name == topic);
+						  .OfType<ColorItem>()
+						  .SingleOrDefault(it => it.Name == topic);
 				if (item == null) {
 					item = new ColorItem {
-						                     Name  = topic,
-						                     Color = value,
-						                     Update = it => {
-							                              _colors[it.Name] = it.Color;
-							                              Canvas2D.Invalidate();
-						                              }
-					                     };
+											 Name  = topic,
+											 Color = value,
+											 Update = it => {
+														  _colors[it.Name] = it.Color;
+														  Canvas2D.Invalidate();
+													  }
+										 };
 					_colors[topic] = value;
 					MainList.Items.Add(item);
 					MainList.SelectedItems.Add(item);
@@ -78,13 +79,13 @@ namespace MonitorTool.Controls {
 		/// </summary>
 		public void Update() => Canvas2D.Invalidate();
 
-		#region Never Mind
+		#region Private
 
-		private readonly ViewModel                 _viewModelContext;
 		private readonly Dictionary<string, Color> _colors = new Dictionary<string, Color>();
 
-		private RerangeState _state = RerangeState.Idle;
-		private Point        _origin, _current;
+		private RangeState _state = RangeState.Idle;
+		private Point      _origin, _current;
+		private DateTime   _pressTime;
 
 		public GraphicView() {
 			InitializeComponent();
@@ -108,9 +109,9 @@ namespace MonitorTool.Controls {
 		}
 
 		private static void Order(double    a,
-		                          double    b,
-		                          out float min,
-		                          out float max) {
+								  double    b,
+								  out float min,
+								  out float max) {
 			if (a < b) {
 				min = (float) a;
 				max = (float) b;
@@ -132,32 +133,31 @@ namespace MonitorTool.Controls {
 			var height = (float) sender.ActualHeight;
 			_viewModelContext.BuildTransform(out var transform, out var reverse);
 
-			// 计算范围
+			// 计算范围指定
 			switch (_state) {
-				case RerangeState.Idle:
+				case RangeState.Idle:
+					// 空闲状态
 					break;
-				case RerangeState.Reset:
+				case RangeState.Reset:
+					// 正在重新划定范围
 					args.DrawingSession
-					    .DrawRoundedRectangle(new Rect(_origin, _current), 0, 0, Colors.White);
+						.DrawRoundedRectangle(new Rect(_origin, _current), 0, 0, Colors.White);
 					break;
-				case RerangeState.Done:
-					var rect = new Rect(_origin, _current);
-					if (rect.Height < 100 || rect.Width < 100)
-						break;
-
-					_state    = RerangeState.Idle;
+				case RangeState.Done:
+					// 确定范围
+					_state    = RangeState.Idle;
 					AutoRange = false;
 					Order(_origin.X, _current.X, out var x0, out var x1);
 					Order(_origin.Y, _current.Y, out var y0, out var y1);
 					_viewModelContext.Range = (reverse(new Vector2(x0, y1)),
-					                           reverse(new Vector2(x1, y0)));
+											   reverse(new Vector2(x1, y0)));
 					_viewModelContext.BuildTransform(out transform, out reverse);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
-			{
+			{ // 计算实际范围显示
 				var tp0 = reverse(new Vector2(0, height));
 				X0Text.Text = ((int) tp0.X).ToString(CultureInfo.CurrentCulture);
 				Y0Text.Text = ((int) tp0.Y).ToString(CultureInfo.CurrentCulture);
@@ -167,6 +167,7 @@ namespace MonitorTool.Controls {
 				Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
 			}
 
+			// 新图像指定随机颜色
 			var random = new Random();
 			var buffer = new byte[3];
 			foreach (var name in Points.Keys)
@@ -175,6 +176,7 @@ namespace MonitorTool.Controls {
 					this[name] = Color.FromArgb(255, buffer[0], buffer[1], buffer[2]);
 				}
 
+			// 画点
 			var r       = (int) Math.Min(width, height) / 400 + 2;
 			var visible = MainList.SelectedItems.OfType<ColorItem>().Select(it => it.Name);
 			foreach (var (name, list) in Points.Where(it => visible.Contains(it.Key))) {
@@ -192,6 +194,8 @@ namespace MonitorTool.Controls {
 			}
 		}
 
+		#region Pointer
+
 		private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
 			Canvas2D.RemoveFromVisualTree();
 			Canvas2D = null;
@@ -201,28 +205,51 @@ namespace MonitorTool.Controls {
 			=> Canvas2D.Invalidate();
 
 		private void Canvas2D_OnPointerPressed(object sender, PointerRoutedEventArgs e) {
-			_state  = RerangeState.Reset;
-			_origin = e.GetCurrentPoint(Canvas2D).Position;
+			_state     = RangeState.Reset;
+			_origin    = e.GetCurrentPoint(Canvas2D).Position;
+			_pressTime = DateTime.Now;
 		}
 
 		private void Canvas2D_OnPointerMoved(object sender, PointerRoutedEventArgs e) {
 			_current = e.GetCurrentPoint(Canvas2D).Position;
-			if (_state == RerangeState.Reset) Canvas2D.Invalidate();
+			if (_state == RangeState.Reset) Canvas2D.Invalidate();
 		}
 
 		private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e)
-			=> _state = RerangeState.Idle;
+			=> _state = RangeState.Idle;
 
 		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
-			_state = RerangeState.Done;
+			_state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
+						 ? RangeState.Idle
+						 : RangeState.Done;
 			Canvas2D.Invalidate();
 		}
 
-		private enum RerangeState : byte {
+		private void Canvas2D_OnPointerWheelChanged(object sender, PointerRoutedEventArgs e) {
+			_state    = RangeState.Idle;
+			AutoRange = false;
+
+			var pointer = e.GetCurrentPoint(Canvas2D);
+			var point   = pointer.Position.Let(it => new Vector2((float) it.X, (float) it.Y));
+			var scale   = pointer.Properties.MouseWheelDelta / 480f;
+
+			_viewModelContext.BuildTransform(out _, out var reverse);
+			Vector2 Transform(Vector2 p) => reverse((p - point) * (1 - scale) + point);
+			var w = (float) Canvas2D.ActualWidth;
+			var h = (float) Canvas2D.ActualHeight;
+			Range = (Transform(new Vector2(0, h)),
+					 Transform(new Vector2(w, 0)));
+
+			Canvas2D.Invalidate();
+		}
+
+		private enum RangeState : byte {
 			Idle,
 			Reset,
 			Done
 		}
+
+		#endregion
 
 		#endregion
 	}
