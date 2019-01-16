@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks.Dataflow;
 using Windows.UI.Xaml.Controls;
 using MonitorTool.Controls;
-using static MonitorTool.Controls.TopicGraphicHelper.Dimension;
 
 namespace MonitorTool.Pages {
 	public sealed partial class GraphicPage {
@@ -18,18 +18,28 @@ namespace MonitorTool.Pages {
 				return false;
 
 			var graphic = new GraphicView {Range = (Vector2.Zero, new Vector2(10, 1))};
-			new TopicGraphicHelper("kotlin topic server", "sample0", One).Views.Add(graphic);
-			new TopicGraphicHelper("kotlin topic server", "sample1", One).Views.Add(graphic);
+
+			new TopicGraphicHelper("kotlin topic server", "sample0")
+			   .Port
+			   .LinkTo(new ActionBlock<Vector2>
+				           (p => graphic.Operate("kotlin topic server", "sample0", list => list.Add(p))),
+			           new DataflowLinkOptions());
+
+			new TopicGraphicHelper("kotlin topic server", "sample1")
+			   .Port
+			   .LinkTo(new ActionBlock<Vector2>
+				           (p => graphic.Operate("kotlin topic server", "sample1", list => list.Add(p))),
+			           new DataflowLinkOptions());
 
 			var item = new PivotItem {Header = topic, Content = graphic};
 			Pivot.Items.Add(item);
 			GridView.Items.Insert(GridView.Items.Count - 1,
-								  new GridViewItem {
-													   Height  = 200,
-													   Width   = 200,
-													   Tag     = topic,
-													   Content = new TextBlock {Text = topic, FontSize = 36},
-												   });
+			                      new GridViewItem {
+				                                       Height  = 200,
+				                                       Width   = 200,
+				                                       Tag     = topic,
+				                                       Content = new TextBlock {Text = topic, FontSize = 36},
+			                                       });
 			return true;
 		}
 

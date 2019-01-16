@@ -1,63 +1,74 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks.Dataflow;
 using MechDancer.Common;
 using MonitorTool.Source;
+using static System.BitConverter;
 
 namespace MonitorTool.Controls {
 	public class TopicGraphicHelper {
-		public enum Dimension : byte { One = 1, Two = 2 }
+		public enum DimensionEnum : byte {
+			One = 1,
+			Two = 2
+		}
 
 		private readonly long _time = DateTime.Now.Ticks;
 
-		public readonly List<GraphicView> Views
-			= new List<GraphicView>();
+		public readonly BroadcastBlock<Vector2> Port
+			= new BroadcastBlock<Vector2>(null);
+
+		public DimensionEnum Dimension = DimensionEnum.One;
 
 		public TopicGraphicHelper(
-			string    sender,
-			string    topic,
-			Dimension dimension
-		) {
-			Hub.Instance
-			   .Receiver
-			   .Port
-			   .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
-						   (it => Process(sender, topic, it.payload, dimension)),
-					   it => it.sender == sender && it.topic == topic);
-		}
+			string sender,
+			string topic
+		) => Hub.Instance
+		        .Receiver
+		        .Port
+		        .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
+			                (it => Process(it.payload)),
+		                it => it.sender == sender && it.topic == topic);
 
-		private void Process(
-			string    sender,
-			string    topic,
-			byte[]    payload,
-			Dimension dimension
-		) {
-			var stream = new MemoryStream(payload);
-			var id     = $"{sender}: {topic}";
+		private void Process(byte[] payload) {
+			Vector2? v = null;
+			switch (Dimension) {
+				case DimensionEnum.One:
+					switch (payload.Length) {
+						case sizeof(float):
+							v = new Vector2((float) (DateTime.Now.Ticks - _time) / 10000,
+							                ToSingle(payload.Also(Array.Reverse)));
+							break;
+						case sizeof(double):
+							v = new Vector2((float) (DateTime.Now.Ticks - _time) / 10000,
+							                (float) ToDouble(payload.Also(Array.Reverse)));
+							break;
+						default:
+							break;
+					}
 
-			Vector2 v;
-			switch (dimension) {
-				case Dimension.One:
-					v = new Vector2((float) (DateTime.Now.Ticks - _time) / 10000,
-									BitConverter.ToSingle(stream.WaitReversed(4)));
 					break;
-				case Dimension.Two:
-					v = new Vector2(BitConverter.ToSingle(stream.WaitReversed(4)),
-									BitConverter.ToSingle(stream.WaitReversed(4)));
+				case DimensionEnum.Two:
+					var stream = new MemoryStream(payload);
+					switch (payload.Length) {
+						case 2 * sizeof(float):
+							v = new Vector2(ToSingle(stream.WaitReversed(sizeof(float))),
+							                ToSingle(stream.WaitReversed(sizeof(float))));
+							break;
+						case 2 * sizeof(double):
+							v = new Vector2((float) ToDouble(stream.WaitReversed(sizeof(double))),
+							                (float) ToDouble(stream.WaitReversed(sizeof(double))));
+							break;
+						default:
+							break;
+					}
+
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
-			foreach (var graphicView in Views) {
-				if (graphicView.Points.TryGetValue(id, out var list))
-					list.Add(v);
-				else
-					graphicView.Points[id] = new List<Vector2> {v};
-				graphicView.Update();
-			}
+			v?.Let(Port.Post);
 		}
 	}
 }

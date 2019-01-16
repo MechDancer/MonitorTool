@@ -1,21 +1,25 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Threading;
 using MechDancer.Framework.Net.Presets;
+using MonitorTool.Controls;
 
 namespace MonitorTool.Source {
 	public class Hub {
 		public static readonly Hub Instance = new Hub();
 
-		private Hub() {
-			new Thread
-				(() => {
-					 while (true) {
-						 if (RemoteHub == null)
-							 Thread.Sleep(500);
-						 RemoteHub?.Invoke();
-					 }
-				 }) {IsBackground = true}.Start();
-		}
+		public readonly ConcurrentDictionary<(string, string), TopicGraphicHelper> Helpers
+			= new ConcurrentDictionary<(string, string), TopicGraphicHelper>();
+
+		private Hub()
+			=> new Thread
+			   (() => {
+				    while (true) {
+					    if (RemoteHub == null)
+						    Thread.Sleep(500);
+					    RemoteHub?.Invoke();
+				    }
+			    }) {IsBackground = true}.Start();
 
 		public RemoteHub     RemoteHub { get; private set; }
 		public TopicReceiver Receiver  { get; } = new TopicReceiver();

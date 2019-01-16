@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -13,7 +14,10 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
-		public readonly Dictionary<string, List<Vector2>> Points
+		private readonly ReaderWriterLock _lock
+			= new ReaderWriterLock();
+
+		private readonly Dictionary<string, List<Vector2>> _points
 			= new Dictionary<string, List<Vector2>>();
 
 		/// <summary>
@@ -23,17 +27,17 @@ namespace MonitorTool.Controls {
 		public Color this[string topic] {
 			set {
 				var item = (MainList.Items ?? throw new MemberAccessException())
-						  .OfType<ColorItem>()
-						  .SingleOrDefault(it => it.Name == topic);
+				          .OfType<ColorItem>()
+				          .SingleOrDefault(it => it.Name == topic);
 				if (item == null) {
 					item = new ColorItem {
-											 Name  = topic,
-											 Color = value,
-											 Update = it => {
-														  _colors[it.Name] = it.Color;
-														  Canvas2D.Invalidate();
-													  }
-										 };
+						                     Name  = topic,
+						                     Color = value,
+						                     Update = it => {
+							                              _colors[it.Name] = it.Color;
+							                              Canvas2D.Invalidate();
+						                              }
+					                     };
 					_colors[topic] = value;
 					MainList.Items.Add(item);
 					MainList.SelectedItems.Add(item);
@@ -74,6 +78,17 @@ namespace MonitorTool.Controls {
 			set => _viewModelContext.Proportional = value;
 		}
 
+		public void Operate(string sender, string topic, Action<List<Vector2>> action) {
+			_lock.Write(() => {
+				            var id = $"{sender}: {topic}";
+				            if (_points.TryGetValue(id, out var list))
+					            action(list);
+				            else
+					            _points[id] = new List<Vector2>().Also(action);
+			            });
+			Canvas2D.Invalidate();
+		}
+
 		/// <summary>
 		/// 	强制重新画图
 		/// </summary>
@@ -97,21 +112,24 @@ namespace MonitorTool.Controls {
 			var y0 = float.MaxValue;
 			var x1 = float.MinValue;
 			var y1 = float.MinValue;
-			foreach (var list in Points.Values)
-			foreach (var vector2 in list) {
-				if (vector2.X      < x0) x0 = vector2.X;
-				else if (vector2.X > x1) x1 = vector2.X;
-				if (vector2.Y      < y0) y0 = vector2.Y;
-				else if (vector2.Y > y1) y1 = vector2.Y;
-			}
+			_lock.Read(() => {
+				           foreach (var list in _points.Values)
+				           foreach (var vector2 in list) {
+					           if (vector2.X      < x0) x0 = vector2.X;
+					           else if (vector2.X > x1) x1 = vector2.X;
+					           if (vector2.Y      < y0) y0 = vector2.Y;
+					           else if (vector2.Y > y1) y1 = vector2.Y;
+				           }
 
+				           return new object();
+			           });
 			return (new Vector2(x0, y0), new Vector2(x1, y1));
 		}
 
 		private static void Order(double    a,
-								  double    b,
-								  out float min,
-								  out float max) {
+		                          double    b,
+		                          out float min,
+		                          out float max) {
 			if (a < b) {
 				min = (float) a;
 				max = (float) b;
@@ -141,7 +159,12 @@ namespace MonitorTool.Controls {
 				case RangeState.Reset:
 					// 正在重新划定范围
 					args.DrawingSession
-						.DrawRoundedRectangle(new Rect(_origin, _current), 0, 0, Colors.White);
+					    .DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
+					                                   new Point(_current.X - 1, _current.Y - 1)),
+					                          0, 0, Colors.White);
+					args.DrawingSession
+					    .DrawRoundedRectangle(new Rect(_origin, _current),
+					                          0, 0, Colors.Black);
 					break;
 				case RangeState.Done:
 					// 确定范围
@@ -150,7 +173,7 @@ namespace MonitorTool.Controls {
 					Order(_origin.X, _current.X, out var x0, out var x1);
 					Order(_origin.Y, _current.Y, out var y0, out var y1);
 					_viewModelContext.Range = (reverse(new Vector2(x0, y1)),
-											   reverse(new Vector2(x1, y0)));
+					                           reverse(new Vector2(x1, y0)));
 					_viewModelContext.BuildTransform(out transform, out reverse);
 					break;
 				default:
@@ -168,30 +191,34 @@ namespace MonitorTool.Controls {
 			}
 
 			// 新图像指定随机颜色
-			var random = new Random();
-			var buffer = new byte[3];
-			foreach (var name in Points.Keys)
-				if (!_colors.ContainsKey(name)) {
-					random.NextBytes(buffer);
-					this[name] = Color.FromArgb(255, buffer[0], buffer[1], buffer[2]);
-				}
+			_lock.Read(() => {
+				           var random = new Random();
+				           var buffer = new byte[3];
+				           foreach (var name in _points.Keys)
+					           if (!_colors.ContainsKey(name)) {
+						           random.NextBytes(buffer);
+						           this[name] = Color.FromArgb(255, buffer[0], buffer[1], buffer[2]);
+					           }
 
-			// 画点
-			var r       = (int) Math.Min(width, height) / 400 + 2;
-			var visible = MainList.SelectedItems.OfType<ColorItem>().Select(it => it.Name);
-			foreach (var (name, list) in Points.Where(it => visible.Contains(it.Key))) {
-				Vector2? last  = null;
-				var      color = _colors[name];
-				foreach (var p in list) {
-					var onCanvas = transform(p);
-					args.DrawingSession.FillCircle(onCanvas, r, color);
+				           // 画点
+				           var r       = (int) Math.Min(width, height) / 400 + 2;
+				           var visible = MainList.SelectedItems.OfType<ColorItem>().Select(it => it.Name);
+				           foreach (var (name, list) in _points.Where(it => visible.Contains(it.Key))) {
+					           Vector2? last  = null;
+					           var      color = _colors[name];
+					           foreach (var p in list) {
+						           var onCanvas = transform(p);
+						           args.DrawingSession.FillCircle(onCanvas, r, color);
 
-					if (last != null && _viewModelContext.Connection)
-						args.DrawingSession.DrawLine(last.Value, onCanvas, color, 1);
+						           if (last != null && _viewModelContext.Connection)
+							           args.DrawingSession.DrawLine(last.Value, onCanvas, color, 1);
 
-					last = onCanvas;
-				}
-			}
+						           last = onCanvas;
+					           }
+				           }
+
+				           return new object();
+			           });
 		}
 
 		#region Pointer
@@ -220,8 +247,8 @@ namespace MonitorTool.Controls {
 
 		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
 			_state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
-						 ? RangeState.Idle
-						 : RangeState.Done;
+				         ? RangeState.Idle
+				         : RangeState.Done;
 			Canvas2D.Invalidate();
 		}
 
@@ -238,7 +265,7 @@ namespace MonitorTool.Controls {
 			var w = (float) Canvas2D.ActualWidth;
 			var h = (float) Canvas2D.ActualHeight;
 			Range = (Transform(new Vector2(0, h)),
-					 Transform(new Vector2(w, 0)));
+			         Transform(new Vector2(w, 0)));
 
 			Canvas2D.Invalidate();
 		}

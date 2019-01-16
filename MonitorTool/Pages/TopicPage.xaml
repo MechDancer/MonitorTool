@@ -9,7 +9,17 @@
             <ColumnDefinition Width="300" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <TreeView Name="TopicView" AllowDrop="False" />
-        <Frame Grid.Column="1" />
+        <TreeView Name="TopicView" AllowDrop="False" ItemInvoked="TopicView_ItemInvoked" />
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock FontSize="32" Text="{x:Bind _viewModel.Host, Mode=OneWay}" />
+                <TextBlock FontSize="32" Text=":" Margin="4,0,8,0" />
+                <TextBlock FontSize="32" Text="{x:Bind _viewModel.Topic, Mode=OneWay}" />
+            </StackPanel>
+            <ComboBox Header="数据格式" Margin="8" SelectionChanged="Selector_OnSelectionChanged">
+                <x:String>一维</x:String>
+                <x:String>二维</x:String>
+            </ComboBox>
+        </StackPanel>
     </Grid>
 </Page>
