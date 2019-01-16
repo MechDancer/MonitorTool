@@ -4,7 +4,6 @@ using System.Numerics;
 using System.Threading.Tasks.Dataflow;
 using MechDancer.Common;
 using MonitorTool.Source;
-using static System.BitConverter;
 
 namespace MonitorTool.Controls {
 	public class TopicGraphicHelper {
@@ -24,42 +23,39 @@ namespace MonitorTool.Controls {
 			string sender,
 			string topic
 		) => Global.Instance
-		           .Receiver
-		           .Port
-		           .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
-			                   (it => Process(it.payload)),
-		                   it => it.sender == sender && it.topic == topic);
+				   .Receiver
+				   .Port
+				   .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
+							   (it => Process(it.payload)),
+						   it => it.sender == sender && it.topic == topic);
 
 		private void Process(byte[] payload) {
-			Vector2? v = null;
+			Vector2? v      = null;
+			var      stream = new MemoryStream(payload);
+
 			switch (Dimension) {
 				case DimensionEnum.One:
 					switch (payload.Length) {
 						case sizeof(float):
 							v = new Vector2((float) (DateTime.Now.Ticks - _time) / 10000,
-							                ToSingle(payload.Also(Array.Reverse)));
+											stream.ReadFloat());
 							break;
 						case sizeof(double):
 							v = new Vector2((float) (DateTime.Now.Ticks - _time) / 10000,
-							                (float) ToDouble(payload.Also(Array.Reverse)));
-							break;
-						default:
+											(float) stream.ReadDouble());
 							break;
 					}
 
 					break;
 				case DimensionEnum.Two:
-					var stream = new MemoryStream(payload);
 					switch (payload.Length) {
 						case 2 * sizeof(float):
-							v = new Vector2(ToSingle(stream.WaitReversed(sizeof(float))),
-							                ToSingle(stream.WaitReversed(sizeof(float))));
+							v = new Vector2(stream.ReadFloat(),
+											stream.ReadFloat());
 							break;
 						case 2 * sizeof(double):
-							v = new Vector2((float) ToDouble(stream.WaitReversed(sizeof(double))),
-							                (float) ToDouble(stream.WaitReversed(sizeof(double))));
-							break;
-						default:
+							v = new Vector2((float) stream.ReadDouble(),
+											(float) stream.ReadDouble());
 							break;
 					}
 

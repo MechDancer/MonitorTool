@@ -85,14 +85,14 @@
                       ItemTemplate="{StaticResource ColorTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple" />
-            <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
-                    HorizontalAlignment="Stretch" Height="32">
-                <Button.Flyout>
+            <DropDownButton Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
+                            HorizontalAlignment="Stretch" Height="32">
+                <DropDownButton.Flyout>
                     <Flyout>
-                        <ComboBox ItemsSource="{x:Bind Topics}" SelectionChanged="Selector_OnSelectionChanged"/>
+                        <ListView ItemsSource="{x:Bind Topics}" SelectionChanged="Selector_OnSelectionChanged" />
                     </Flyout>
-                </Button.Flyout>
-            </Button>
+                </DropDownButton.Flyout>
+            </DropDownButton>
         </StackPanel>
     </Grid>
 </UserControl>
