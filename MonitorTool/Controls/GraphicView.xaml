@@ -60,8 +60,8 @@
                                   PointerReleased="Canvas2D_OnPointerReleased"
                                   PointerExited="Canvas2D_OnPointerCanceled"
                                   PointerCanceled="Canvas2D_OnPointerCanceled"
-                                  PointerCaptureLost="Canvas2D_OnPointerCanceled" 
-                                  PointerWheelChanged="Canvas2D_OnPointerWheelChanged"/>
+                                  PointerCaptureLost="Canvas2D_OnPointerCanceled"
+                                  PointerWheelChanged="Canvas2D_OnPointerWheelChanged" />
         </Border>
 
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">
@@ -85,6 +85,14 @@
                       ItemTemplate="{StaticResource ColorTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple" />
+            <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
+                    HorizontalAlignment="Stretch" Height="32">
+                <Button.Flyout>
+                    <Flyout>
+                        <ComboBox ItemsSource="{x:Bind Topics}" SelectionChanged="Selector_OnSelectionChanged"/>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

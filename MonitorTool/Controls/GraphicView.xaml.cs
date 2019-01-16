@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
+using System.Threading.Tasks.Dataflow;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Xaml;
@@ -11,6 +12,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using MechDancer.Common;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using MonitorTool.Source;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
@@ -19,6 +21,14 @@ namespace MonitorTool.Controls {
 
 		private readonly Dictionary<string, List<Vector2>> _points
 			= new Dictionary<string, List<Vector2>>();
+
+		private IEnumerable<string> Topics
+			=> Global.Instance
+			         .Helpers
+			         .Keys
+			         .Select(it => $"{it.Item1}: {it.Item2}")
+			         .WhereNot(it => _points.ContainsKey(it))
+			         .ToList();
 
 		/// <summary>
 		/// 	设置颜色
@@ -93,6 +103,15 @@ namespace MonitorTool.Controls {
 		/// 	强制重新画图
 		/// </summary>
 		public void Update() => Canvas2D.Invalidate();
+
+		private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
+			var selection = (string) e.AddedItems.Single();
+			if (_points.ContainsKey(selection)) return;
+			var ((name, topic), helper) =
+				Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
+			helper.Port.LinkTo(new ActionBlock<Vector2>(p => Operate(name, topic, list => list.Add(p))),
+			                   new DataflowLinkOptions());
+		}
 
 		#region Private
 

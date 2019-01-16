@@ -7,16 +7,19 @@ using Windows.UI.Xaml.Navigation;
 using MechDancer.Common;
 using MonitorTool.Controls;
 using MonitorTool.Source;
-using Hub = MonitorTool.Source.Hub;
 
 namespace MonitorTool.Pages {
 	public sealed partial class TopicPage {
+		// 数据绑定
+		private readonly ViewModel _viewModel = new ViewModel();
+
+		// 监听话题
 		private IDisposable _link;
-		private ViewModel   _viewModel = new ViewModel();
+
 		public TopicPage() => InitializeComponent();
 
 		protected override void OnNavigatedTo(NavigationEventArgs e)
-			=> _link = Hub.Instance.Receiver.Port.LinkTo
+			=> _link = Global.Instance.Receiver.Port.LinkTo
 				   (new ActionBlock<(string, string, byte[])>
 					    (it => {
 						     var (sender, topic, _) = it;
@@ -24,8 +27,11 @@ namespace MonitorTool.Pages {
 							     TopicView.RootNodes.SingleOrDefault(x => (string) x.Content == sender);
 						     if (root == null) {
 							     root = new TreeViewNode {
-								                             Content  = sender,
-								                             Children = {new TreeViewNode {Content = topic}}
+								                             Content = sender,
+								                             Children = {
+									                                        new TreeViewNode
+									                                        {Content = topic}
+								                                        }
 							                             };
 							     TopicView.RootNodes.Add(root);
 						     } else if (root.Children.None(x => (string) x.Content == topic))
@@ -56,18 +62,8 @@ namespace MonitorTool.Pages {
 			}
 		}
 
-		private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-			if (_viewModel.Topic == "") return;
-			var dim = (string) e.AddedItems.Single() == "一维"
-				          ? TopicGraphicHelper.DimensionEnum.One
-				          : TopicGraphicHelper.DimensionEnum.Two;
-			Hub.Instance.Helpers.GetOrAdd
-				((_viewModel.Host, _viewModel.Topic),
-				 new TopicGraphicHelper(_viewModel.Host, _viewModel.Topic)
-				).Dimension = dim;
-		}
-
 		private class ViewModel : BindableBase {
+			private string _dim;
 			private string _host;
 			private string _topic;
 
@@ -78,7 +74,30 @@ namespace MonitorTool.Pages {
 
 			public string Topic {
 				get => _topic;
-				set => SetProperty(ref _topic, value);
+				set {
+					SetProperty(ref _topic, value);
+					if (string.IsNullOrWhiteSpace(value)) return;
+					Dim = Global.Instance
+					            .Helpers
+					            .TryGetValue((Host, Topic), out var helper)
+					   && helper.Dimension == TopicGraphicHelper.DimensionEnum.Two
+						      ? "二维"
+						      : "一维";
+				}
+			}
+
+			public string Dim {
+				get => _dim;
+				set {
+					SetProperty(ref _dim, value);
+					if (string.IsNullOrWhiteSpace(_topic)) return;
+					Global.Instance
+					      .Helpers
+					      .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic))
+					      .Dimension = value == "一维"
+						                   ? TopicGraphicHelper.DimensionEnum.One
+						                   : TopicGraphicHelper.DimensionEnum.Two;
+				}
 			}
 		}
 	}

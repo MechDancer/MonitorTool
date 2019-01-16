@@ -6,7 +6,7 @@ using Windows.Storage;
 using Windows.UI.Xaml.Controls;
 using MechDancer.Framework.Net.Presets;
 using MonitorTool.Pages;
-using Hub = MonitorTool.Source.Hub;
+using MonitorTool.Source;
 
 namespace MonitorTool {
 	public sealed partial class MainPage {
@@ -28,7 +28,7 @@ namespace MonitorTool {
 					 ushort.Parse(Get("Port", "0")));
 
 				new Pacemaker(group).Activate();
-				Hub.Instance.SetEndPoint(group);
+				Global.Instance.SetEndPoint(group);
 			}
 		}
 

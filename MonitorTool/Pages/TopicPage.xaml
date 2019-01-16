@@ -16,7 +16,7 @@
                 <TextBlock FontSize="32" Text=":" Margin="4,0,8,0" />
                 <TextBlock FontSize="32" Text="{x:Bind _viewModel.Topic, Mode=OneWay}" />
             </StackPanel>
-            <ComboBox Header="数据格式" Margin="8" SelectionChanged="Selector_OnSelectionChanged">
+            <ComboBox Header="数据格式" Margin="8" SelectedItem="{x:Bind _viewModel.Dim, Mode=TwoWay}">
                 <x:String>一维</x:String>
                 <x:String>二维</x:String>
             </ComboBox>

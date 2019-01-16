@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks.Dataflow;
 using Windows.UI.Xaml.Controls;
 using MonitorTool.Controls;
 
@@ -18,20 +17,7 @@ namespace MonitorTool.Pages {
 				return false;
 
 			var graphic = new GraphicView {Range = (Vector2.Zero, new Vector2(10, 1))};
-
-			new TopicGraphicHelper("kotlin topic server", "sample0")
-			   .Port
-			   .LinkTo(new ActionBlock<Vector2>
-				           (p => graphic.Operate("kotlin topic server", "sample0", list => list.Add(p))),
-			           new DataflowLinkOptions());
-
-			new TopicGraphicHelper("kotlin topic server", "sample1")
-			   .Port
-			   .LinkTo(new ActionBlock<Vector2>
-				           (p => graphic.Operate("kotlin topic server", "sample1", list => list.Add(p))),
-			           new DataflowLinkOptions());
-
-			var item = new PivotItem {Header = topic, Content = graphic};
+			var item    = new PivotItem {Header  = topic, Content = graphic};
 			Pivot.Items.Add(item);
 			GridView.Items.Insert(GridView.Items.Count - 1,
 			                      new GridViewItem {

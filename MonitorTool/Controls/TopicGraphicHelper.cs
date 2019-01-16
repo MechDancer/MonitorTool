@@ -23,12 +23,12 @@ namespace MonitorTool.Controls {
 		public TopicGraphicHelper(
 			string sender,
 			string topic
-		) => Hub.Instance
-		        .Receiver
-		        .Port
-		        .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
-			                (it => Process(it.payload)),
-		                it => it.sender == sender && it.topic == topic);
+		) => Global.Instance
+		           .Receiver
+		           .Port
+		           .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
+			                   (it => Process(it.payload)),
+		                   it => it.sender == sender && it.topic == topic);
 
 		private void Process(byte[] payload) {
 			Vector2? v = null;

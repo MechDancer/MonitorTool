@@ -5,13 +5,13 @@ using MechDancer.Framework.Net.Presets;
 using MonitorTool.Controls;
 
 namespace MonitorTool.Source {
-	public class Hub {
-		public static readonly Hub Instance = new Hub();
+	public class Global {
+		public static readonly Global Instance = new Global();
 
 		public readonly ConcurrentDictionary<(string, string), TopicGraphicHelper> Helpers
 			= new ConcurrentDictionary<(string, string), TopicGraphicHelper>();
 
-		private Hub()
+		private Global()
 			=> new Thread
 			   (() => {
 				    while (true) {

@@ -159,7 +159,7 @@
       </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
       <Compile Include="Source\BindableBase.cs"/>
-      <Compile Include="Source\Hub.cs"/>
+      <Compile Include="Source\Global.cs"/>
       <Compile Include="Source\TopicReceiver.cs"/>
   </ItemGroup>
   <ItemGroup>
