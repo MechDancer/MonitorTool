@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using Windows.UI.Xaml.Controls;
 using MonitorTool.Controls;
 
@@ -16,8 +15,8 @@ namespace MonitorTool.Pages {
 			if (Pivot.Items.Any(it => it is PivotItem x && (string) x.Header == topic))
 				return false;
 
-			var graphic = new GraphicView {Range = (Vector2.Zero, new Vector2(10, 1))};
-			var item    = new PivotItem {Header  = topic, Content = graphic};
+			var graphic = new GraphicView();
+			var item    = new PivotItem {Header = topic, Content = graphic};
 			Pivot.Items.Add(item);
 			GridView.Items.Insert(GridView.Items.Count - 1,
 			                      new GridViewItem {

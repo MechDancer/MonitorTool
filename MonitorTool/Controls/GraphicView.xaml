@@ -64,19 +64,44 @@
                                   PointerWheelChanged="Canvas2D_OnPointerWheelChanged" />
         </Border>
 
-        <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">
+        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Padding="8,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
             <CheckBox Content="连线" MinWidth="0"
-                      IsChecked="{x:Bind _viewModelContext.Connection, Mode=TwoWay}" />
+                      Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                      IsChecked="{x:Bind ViewModelContext.Connection, Mode=TwoWay}" />
             <CheckBox Content="保持比例" MinWidth="0"
-                      IsChecked="{x:Bind _viewModelContext.Proportional, Mode=TwoWay}" />
-            <ToggleButton Content="自动范围" IsChecked="{x:Bind _viewModelContext.AutoRange, Mode=TwoWay}"
-                          HorizontalAlignment="Stretch" Margin="0,4" />
+                      Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                      IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
+            <ToggleButton Content="自动移动" IsChecked="{x:Bind ViewModelContext.AutoMove, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" Margin="0,4"
+                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
+            <ToggleButton Content="自动X范围" IsChecked="{x:Bind ViewModelContext.AutoX, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" Margin="0,4,2,4"
+                          Grid.Row="3" Grid.Column="0" />
+            <ToggleButton Content="自动Y范围" IsChecked="{x:Bind ViewModelContext.AutoY, Mode=TwoWay}"
+                          HorizontalAlignment="Stretch" Margin="2,4,0,4"
+                          Grid.Row="3" Grid.Column="1" />
             <Button Content="背景"
-                    Background="{x:Bind local:ColorItem.ToBrush(_viewModelContext.Background), Mode=OneWay}"
-                    HorizontalAlignment="Stretch" Margin="0,4">
+                    Background="{x:Bind local:ColorItem.ToBrush(ViewModelContext.Background), Mode=OneWay}"
+                    HorizontalAlignment="Stretch" Margin="2,4,0,4"
+                    Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button.Flyout>
                     <Flyout>
-                        <ColorPicker Color="{x:Bind _viewModelContext.Background, Mode=TwoWay}"
+                        <ColorPicker Color="{x:Bind ViewModelContext.Background, Mode=TwoWay}"
                                      IsAlphaEnabled="True" />
                     </Flyout>
                 </Button.Flyout>
@@ -84,15 +109,17 @@
             <ListView Name="MainList" Header="图例"
                       ItemTemplate="{StaticResource ColorTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
-                      Margin="0,4" SelectionMode="Multiple" />
+                      Margin="0,4" SelectionMode="Multiple"
+                      Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
             <DropDownButton Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
-                            HorizontalAlignment="Stretch" Height="32">
+                            HorizontalAlignment="Stretch" Height="32"
+                            Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
                 <DropDownButton.Flyout>
                     <Flyout>
                         <ListView ItemsSource="{x:Bind Topics}" SelectionChanged="Selector_OnSelectionChanged" />
                     </Flyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
