@@ -89,19 +89,7 @@ namespace MonitorTool.Controls {
 
 		public GraphicView(ViewModel context = null) {
 			InitializeComponent();
-			if (context == null) {
-				ViewModelContext = new ViewModel(Canvas2D);
-			} else {
-				ViewModelContext = new ViewModel(Canvas2D) {
-					                                           Range        = context.Range,
-					                                           AutoX        = context.AutoX,
-					                                           AutoY        = context.AutoY,
-					                                           AutoMove     = context.AutoMove,
-					                                           Proportional = context.Proportional,
-					                                           Connection   = context.Connection,
-					                                           Background   = context.Background
-				                                           };
-			}
+			ViewModelContext = context ?? new ViewModel(Canvas2D);
 		}
 
 		/// <summary>
