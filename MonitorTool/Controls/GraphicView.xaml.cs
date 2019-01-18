@@ -59,13 +59,9 @@ namespace MonitorTool.Controls {
 		}
 
 		public void Operate(string sender, string topic, Action<List<Vector2>> action) {
-			lock (_points) {
-				var id = $"{sender}: {topic}";
-				if (_points.TryGetValue(id, out var list))
-					action(list);
-				else
-					_points[id] = new List<Vector2>().Also(action);
-			}
+			var id   = $"{sender}: {topic}";
+			var list = _points.GetOrAdd(id, new List<Vector2>());
+			lock (list) action(list);
 
 			Canvas2D.Invalidate();
 		}
@@ -200,28 +196,37 @@ namespace MonitorTool.Controls {
 				}
 
 			// 排除不画的
-			var visible = MainList.SelectedItems.OfType<ColorItem>().Select(it => it.Name).ToArray();
-			var points = _points.Where(it => visible.Contains(it.Key))
-			                    .ToImmutableDictionary(it => it.Key, it => it.Value);
+			var visible = MainList
+			             .SelectedItems
+			             .OfType<ColorItem>()
+			             .Select(it => it.Name)
+			             .ToArray();
+			var points = (from entry in _points
+			              where visible.Contains(entry.Key)
+			              where entry.Value.Any()
+			              select entry)
+			   .ToImmutableDictionary(it => it.Key,
+			                          it => {
+				                          var (_, list) = it;
+				                          lock (list) return list.ToImmutableList();
+			                          });
 
-			lock (_points) {
-				// 自动范围
-				var range =
-					ViewModelContext.AutoMove
-						? CalculateRange
-							(points: from list in points.Values where list.Any() select list.Last(),
-							 current: ViewModelContext.Range,
-							 x: true,
-							 y: true,
-							 allowShrink: false)
-						: ViewModelContext.Range;
-				ViewModelContext.Range = CalculateRange
-					(points: points.Values.Flatten(),
-					 current: range,
-					 x: ViewModelContext.AutoX,
-					 y: ViewModelContext.AutoY,
-					 allowShrink: true);
-			}
+			// 自动范围
+			var range =
+				ViewModelContext.AutoMove
+					? CalculateRange
+						(points: points.Values.Select(it => it.Last()),
+						 current: ViewModelContext.Range,
+						 x: true,
+						 y: true,
+						 allowShrink: false)
+					: ViewModelContext.Range;
+			ViewModelContext.Range = CalculateRange
+				(points: points.Values.Flatten(),
+				 current: range,
+				 x: ViewModelContext.AutoX,
+				 y: ViewModelContext.AutoY,
+				 allowShrink: true);
 
 			// 保存参数
 			var width  = (float) sender.ActualWidth;
