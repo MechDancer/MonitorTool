@@ -23,24 +23,23 @@ namespace MonitorTool.Pages {
 		protected override void OnNavigatedTo(NavigationEventArgs e) {
 			View.Dispatcher.RunAsync
 				(Low, async () => {
-						  foreach (var group in Memory) Add(group);
-						  while (!_cancel.IsCancellationRequested) {
-							  try {
-								  await Task.Delay(500, _cancel.Token);
-							  } catch (TaskCanceledException) { }
+					      foreach (var group in Memory) Add(group);
+					      while (!_cancel.IsCancellationRequested) {
+						      try {
+							      await Task.Delay(500, _cancel.Token);
+						      } catch (TaskCanceledException) { }
 
-							  foreach (var view in View.Items?.OfType<ProbeView>()
-												?? new ProbeView[] { })
-								  view.Refresh(TimeSpan.FromSeconds(1));
-						  }
-					  });
+						      foreach (var view in View.Items?.OfType<ProbeView>()
+						                        ?? new ProbeView[] { })
+							      view.Refresh(TimeSpan.FromSeconds(1));
+					      }
+				      });
 
 			if (View.Items?.FirstOrDefault() is GroupSelector selector)
 				selector.ButtonClick += group => Memory.Add(group).Then(() => Add(group));
 		}
 
-		protected override void OnNavigatedFrom(NavigationEventArgs e)
-			=> _cancel.Cancel();
+		protected override void OnNavigatedFrom(NavigationEventArgs e) => _cancel.Cancel();
 
 		private void Add(IPEndPoint group) {
 			Debug.Assert(View.Items != null, "View.Items != null");

@@ -29,8 +29,10 @@ namespace MonitorTool.Pages {
 							     root = new TreeViewNode {
 								                             Content = sender,
 								                             Children = {
-									                                        new TreeViewNode
-									                                        {Content = topic}
+									                                        new TreeViewNode {
+										                                                         Content
+											                                                         = topic
+									                                                         }
 								                                        }
 							                             };
 							     TopicView.RootNodes.Add(root);
@@ -43,8 +45,7 @@ namespace MonitorTool.Pages {
 					                                       }
 					    ));
 
-		protected override void OnNavigatedFrom(NavigationEventArgs e)
-			=> _link?.Dispose();
+		protected override void OnNavigatedFrom(NavigationEventArgs e) => _link?.Dispose();
 
 		private void TopicView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args) {
 			if (!(args.InvokedItem is TreeViewNode node)) return;

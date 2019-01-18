@@ -19,15 +19,14 @@ namespace MonitorTool.Controls {
 
 		public DimensionEnum Dimension = DimensionEnum.One;
 
-		public TopicGraphicHelper(
-			string sender,
-			string topic
-		) => Global.Instance
-		           .Receiver
-		           .Port
-		           .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
-			                   (it => Process(it.payload)),
-		                   it => it.sender == sender && it.topic == topic);
+		public TopicGraphicHelper(string sender,
+		                          string topic)
+			=> Global.Instance
+			         .Receiver
+			         .Port
+			         .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
+				                 (it => Process(it.payload)),
+			                 it => it.sender == sender && it.topic == topic);
 
 		private void Process(byte[] payload) {
 			Vector2? v      = null;

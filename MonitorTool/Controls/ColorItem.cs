@@ -18,7 +18,6 @@ namespace MonitorTool.Controls {
 			}
 		}
 
-		public static Brush ToBrush(Color color)
-			=> new SolidColorBrush(color);
+		public static Brush ToBrush(Color color) => new SolidColorBrush(color);
 	}
 }

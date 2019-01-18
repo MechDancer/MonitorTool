@@ -68,8 +68,7 @@ namespace MonitorTool {
 
 			public event PropertyChangedEventHandler PropertyChanged;
 
-			private void Notify(string name)
-				=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+			private void Notify(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 	}
 }

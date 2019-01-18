@@ -113,13 +113,11 @@ namespace MonitorTool.Controls {
 		/// <param name="y">确定纵轴</param>
 		/// <param name="allowShrink">允许范围缩小</param>
 		/// <returns>目标范围</returns>
-		private static (Vector2, Vector2) CalculateRange(
-			(Vector2, Vector2)   current,
-			IEnumerable<Vector2> points,
-			bool                 x,
-			bool                 y,
-			bool                 allowShrink
-		) {
+		private static (Vector2, Vector2) CalculateRange((Vector2, Vector2)   current,
+		                                                 IEnumerable<Vector2> points,
+		                                                 bool                 x,
+		                                                 bool                 y,
+		                                                 bool                 allowShrink) {
 			var (min, max) = current;
 			var x0 = float.MaxValue;
 			var x1 = float.MinValue;
@@ -313,8 +311,7 @@ namespace MonitorTool.Controls {
 			Canvas2D = null;
 		}
 
-		private void MainList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-			=> Canvas2D.Invalidate();
+		private void MainList_OnSelectionChanged(object sender, SelectionChangedEventArgs e) => Canvas2D.Invalidate();
 
 		private void Canvas2D_OnPointerPressed(object sender, PointerRoutedEventArgs e) {
 			_state     = RangeState.Reset;
@@ -327,14 +324,11 @@ namespace MonitorTool.Controls {
 			if (_state == RangeState.Reset) Canvas2D.Invalidate();
 		}
 
-		private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e)
-			=> _state = RangeState.Normal;
+		private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e) => _state = RangeState.Normal;
 
-		private void Canvas2D_OnPointerEntered(object sender, PointerRoutedEventArgs e)
-			=> _state = RangeState.Normal;
+		private void Canvas2D_OnPointerEntered(object sender, PointerRoutedEventArgs e) => _state = RangeState.Normal;
 
-		private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e)
-			=> _state = RangeState.Idle;
+		private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e) => _state = RangeState.Idle;
 
 		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
 			_state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
@@ -361,12 +355,7 @@ namespace MonitorTool.Controls {
 			Canvas2D.Invalidate();
 		}
 
-		private enum RangeState : byte {
-			Idle,
-			Normal,
-			Reset,
-			Done
-		}
+		private enum RangeState : byte { Idle, Normal, Reset, Done }
 
 		#endregion
 

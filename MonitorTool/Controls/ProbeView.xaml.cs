@@ -37,8 +37,8 @@ namespace MonitorTool.Controls {
 			if (_probe == null) {
 				_probe = new Probe(endPoint);
 				new Thread(() => {
-							   while (_running) _probe.Invoke();
-						   }) {IsBackground = true}.Start();
+					           while (_running) _probe.Invoke();
+				           }) {IsBackground = true}.Start();
 			} else
 				_probe = new Probe(endPoint);
 
@@ -49,17 +49,13 @@ namespace MonitorTool.Controls {
 		/// 	探针刷新到界面显示
 		/// </summary>
 		/// <param name="timeout">超时时间</param>
-		public void Refresh(TimeSpan timeout)
-			=> _view.Group = _probe[timeout].ToList();
+		public void Refresh(TimeSpan timeout) => _view.Group = _probe[timeout].ToList();
 
-		private void ProbeView_OnUnloaded(object sender, RoutedEventArgs e)
-			=> _running = false;
+		private void ProbeView_OnUnloaded(object sender, RoutedEventArgs e) => _running = false;
 
-		private void Refresh_Click(object sender, RoutedEventArgs e)
-			=> _pacemaker?.Activate();
+		private void Refresh_Click(object sender, RoutedEventArgs e) => _pacemaker?.Activate();
 
-		private void Close_Click(object sender, RoutedEventArgs e)
-			=> CloseButtonClick();
+		private void Close_Click(object sender, RoutedEventArgs e) => CloseButtonClick();
 
 		private class ViewModel : BindableBase {
 			private readonly ObservableCollection<string> _group
