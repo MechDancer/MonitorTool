@@ -30,7 +30,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="48" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
@@ -58,7 +58,8 @@
                                   PointerPressed="Canvas2D_OnPointerPressed"
                                   PointerMoved="Canvas2D_OnPointerMoved"
                                   PointerReleased="Canvas2D_OnPointerReleased"
-                                  PointerExited="Canvas2D_OnPointerCanceled"
+                                  PointerEntered="Canvas2D_OnPointerEntered"
+                                  PointerExited="Canvas2D_OnPointerExited"
                                   PointerCanceled="Canvas2D_OnPointerCanceled"
                                   PointerCaptureLost="Canvas2D_OnPointerCanceled"
                                   PointerWheelChanged="Canvas2D_OnPointerWheelChanged" />

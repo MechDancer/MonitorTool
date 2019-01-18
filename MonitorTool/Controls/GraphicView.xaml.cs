@@ -58,8 +58,14 @@ namespace MonitorTool.Controls {
 			}
 		}
 
-		public void Operate(string sender, string topic, Action<List<Vector2>> action) {
-			var id   = $"{sender}: {topic}";
+		/// <summary>
+		/// 	线程安全地操作点列表
+		/// </summary>
+		/// <param name="host">主机</param>
+		/// <param name="topic">话题</param>
+		/// <param name="action">对列表的操作</param>
+		public void Operate(string host, string topic, Action<List<Vector2>> action) {
+			var id   = $"{host}: {topic}";
 			var list = _points.GetOrAdd(id, new List<Vector2>());
 			lock (list) action(list);
 
@@ -185,6 +191,8 @@ namespace MonitorTool.Controls {
 		private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
 			// 修改背景色
 			sender.ClearColor = ViewModelContext.Background;
+			// 保存画笔
+			var brush = args.DrawingSession;
 
 			// 新图像指定随机颜色
 			var random = new Random();
@@ -237,19 +245,29 @@ namespace MonitorTool.Controls {
 				case RangeState.Idle:
 					// 空闲状态
 					break;
+				case RangeState.Normal:
+					var x = (float) _current.X;
+					var y = (float) _current.Y;
+					brush.DrawLine(new Vector2(x, 0),     new Vector2(x,     height), Colors.White);
+					brush.DrawLine(new Vector2(0, y),     new Vector2(width, y),      Colors.White);
+					brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1),  Colors.Black);
+					brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height),
+					               Colors.Black);
+					var p = reverse(new Vector2(x, y));
+					brush.DrawText($"{p.X}, {p.Y}", x + 1, y - 23, Colors.Black);
+					brush.DrawText($"{p.X}, {p.Y}", x,     y - 24, Colors.White);
+					break;
 				case RangeState.Reset:
 					// 正在重新划定范围
-					args.DrawingSession
-					    .DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
-					                                   new Point(_current.X - 1, _current.Y - 1)),
-					                          0, 0, Colors.White);
-					args.DrawingSession
-					    .DrawRoundedRectangle(new Rect(_origin, _current),
-					                          0, 0, Colors.Black);
+					brush.DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
+					                                    new Point(_current.X - 1, _current.Y - 1)),
+					                           0, 0, Colors.White);
+					brush.DrawRoundedRectangle(new Rect(_origin, _current),
+					                           0, 0, Colors.Black);
 					break;
 				case RangeState.Done:
 					// 确定范围
-					_state                 = RangeState.Idle;
+					_state                 = RangeState.Normal;
 					ViewModelContext.AutoX = ViewModelContext.AutoY = false;
 					Order(_origin.X, _current.X, out var x0, out var x1);
 					Order(_origin.Y, _current.Y, out var y0, out var y1);
@@ -310,17 +328,23 @@ namespace MonitorTool.Controls {
 		}
 
 		private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e)
+			=> _state = RangeState.Normal;
+
+		private void Canvas2D_OnPointerEntered(object sender, PointerRoutedEventArgs e)
+			=> _state = RangeState.Normal;
+
+		private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e)
 			=> _state = RangeState.Idle;
 
 		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
 			_state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
-				         ? RangeState.Idle
+				         ? RangeState.Normal
 				         : RangeState.Done;
 			Canvas2D.Invalidate();
 		}
 
 		private void Canvas2D_OnPointerWheelChanged(object sender, PointerRoutedEventArgs e) {
-			_state                 = RangeState.Idle;
+			_state                 = RangeState.Normal;
 			ViewModelContext.AutoX = ViewModelContext.AutoY = false;
 
 			var pointer = e.GetCurrentPoint(Canvas2D);
@@ -339,6 +363,7 @@ namespace MonitorTool.Controls {
 
 		private enum RangeState : byte {
 			Idle,
+			Normal,
 			Reset,
 			Done
 		}
