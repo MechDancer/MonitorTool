@@ -114,7 +114,7 @@
             <ToggleButton Content="自动Y范围" IsChecked="{x:Bind ViewModelContext.AutoY, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="2,4,0,4"
                           Grid.Row="3" Grid.Column="1" />
-            <Button Content="背景"
+            <Button Content="背景颜色"
                     Background="{x:Bind ViewModelContext.BackgroundBrush, Mode=OneWay}"
                     HorizontalAlignment="Stretch" Margin="2,4,0,4"
                     Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
@@ -125,7 +125,7 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>
-            <ListView Name="MainList" Header="图例"
+            <ListView Name="MainList"
                       ItemTemplate="{StaticResource ColorTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple"

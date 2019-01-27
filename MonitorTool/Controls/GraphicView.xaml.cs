@@ -280,7 +280,6 @@ namespace MonitorTool.Controls {
 			}
 
 			// 画点
-			var r = Math.Min(width, height) / 400 + 2;
 			foreach (var (name, list) in points) {
 				Vector2  onCanvas;
 				Vector2? last   = null;
@@ -288,14 +287,14 @@ namespace MonitorTool.Controls {
 				var      color  = config.Color;
 				foreach (var p in list.SkipLast(1).ToArray()) {
 					onCanvas = transform(p);
-					brush.FillCircle(onCanvas, r, color);
+					brush.FillCircle(onCanvas, 2, color);
 
 					if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
 					last = onCanvas;
 				}
 
 				onCanvas = transform(list.Last());
-				brush.FillCircle(onCanvas, 1.5f * r + 1, color);
+				brush.FillCircle(onCanvas, 4, color);
 				if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
 			}
 		}
