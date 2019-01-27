@@ -8,8 +8,8 @@ using MonitorTool.Controls;
 
 namespace MonitorTool.Pages {
 	public sealed partial class GraphicPage {
-		private static readonly Dictionary<string, GraphicView.ViewModel>
-			Memory = new Dictionary<string, GraphicView.ViewModel>();
+		private static readonly Dictionary<string, GraphicViewModel>
+			Memory = new Dictionary<string, GraphicViewModel>();
 
 		public GraphicPage() => InitializeComponent();
 

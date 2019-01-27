@@ -17,11 +17,13 @@ using MonitorTool.Source;
 
 namespace MonitorTool.Controls {
 	public sealed partial class GraphicView {
-		private readonly ConcurrentDictionary<string, Color> _colors
-			= new ConcurrentDictionary<string, Color>();
+		private readonly ConcurrentDictionary<string, GraphicConfig> _configs
+			= new ConcurrentDictionary<string, GraphicConfig>();
 
 		private readonly ConcurrentDictionary<string, List<Vector2>> _points
 			= new ConcurrentDictionary<string, List<Vector2>>();
+
+		public readonly GraphicViewModel ViewModelContext;
 
 		private IEnumerable<string> Topics
 			=> Global
@@ -31,32 +33,6 @@ namespace MonitorTool.Controls {
 			  .Select(it => $"{it.Item1}: {it.Item2}")
 			  .WhereNot(it => _points.ContainsKey(it))
 			  .ToList();
-
-		/// <summary>
-		///     设置颜色
-		/// </summary>
-		/// <param name="topic">话题名字</param>
-		public Color this[string topic] {
-			set {
-				var item = (MainList.Items ?? throw new MemberAccessException())
-						  .OfType<GraphicConfig>()
-						  .SingleOrDefault(it => it.Name == topic);
-				if (item == null) {
-					item = new GraphicConfig {Name = topic, Color = value};
-					item.PropertyChanged += (sender, args) => {
-						var it = (GraphicConfig) sender;
-						if (args.PropertyName != nameof(GraphicConfig.Color)) return;
-						_colors[it.Name] = it.Color;
-						Canvas2D.Invalidate();
-					};
-					_colors[topic] = value;
-					MainList.Items.Add(item);
-					MainList.SelectedItems.Add(item);
-				} else {
-					item.Color = value;
-				}
-			}
-		}
 
 		/// <summary>
 		///     线程安全地操作点列表
@@ -101,10 +77,10 @@ namespace MonitorTool.Controls {
 
 		#endregion
 
-		public GraphicView(ViewModel context = null) {
+		public GraphicView(GraphicViewModel context = null) {
 			InitializeComponent();
 			ViewModelContext = context?.Also(it => it.Canvas = Canvas2D)
-							?? new ViewModel {Canvas = Canvas2D};
+							?? new GraphicViewModel {Canvas = Canvas2D};
 		}
 
 		/// <summary>
@@ -182,6 +158,13 @@ namespace MonitorTool.Controls {
 			return (new Vector2(x0, y0), new Vector2(x1, y1));
 		}
 
+		/// <summary>
+		///     给两个数字排序
+		/// </summary>
+		/// <param name="a">数字1</param>
+		/// <param name="b">数字2</param>
+		/// <param name="min">较小的</param>
+		/// <param name="max">较大的</param>
 		private static void Order(double    a,
 								  double    b,
 								  out float min,
@@ -196,35 +179,36 @@ namespace MonitorTool.Controls {
 		}
 
 		private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
-			// 修改背景色
-			sender.ClearColor = ViewModelContext.Background;
 			// 保存画笔
 			var brush = args.DrawingSession;
 
-			// 新图像指定随机颜色
-			var random = new Random();
-			var buffer = new byte[3];
-			foreach (var name in _points.Keys)
-				if (!_colors.ContainsKey(name)) {
-					random.NextBytes(buffer);
-					this[name] = Color.FromArgb(255, buffer[0], buffer[1], buffer[2]);
-				}
+			// 新图像添加配置
+			foreach (var topic in _points.Keys) {
+				var config = new GraphicConfig(topic);
+				if (!_configs.TryAdd(topic, config)) continue;
+				config.PropertyChanged += (_, __) => Canvas2D.Invalidate();
+				MainList.Items?.Add(config);
+				MainList.SelectedItems.Add(config);
+			}
 
 			// 排除不画的
 			var visible = MainList
 						 .SelectedItems
 						 .OfType<GraphicConfig>()
 						 .Select(it => it.Name)
-						 .ToArray();
+						 .ToHashSet();
 			var points = (from entry in _points
 						  where visible.Contains(entry.Key)
 						  where entry.Value.Any()
 						  select entry)
 			   .ToImmutableDictionary(it => it.Key,
 									  it => {
-										  var (_, list) = it;
-										  lock (list) return list.ToImmutableList();
+										  var (topic, list) = it;
+										  var count = _configs[topic].Count;
+										  lock (list) return list.TakeLast(count).ToImmutableList();
 									  });
+			if (points.None()) return;
+
 			// 自动范围
 			var range =
 				ViewModelContext.AutoMove
@@ -299,8 +283,9 @@ namespace MonitorTool.Controls {
 			var r = Math.Min(width, height) / 400 + 2;
 			foreach (var (name, list) in points) {
 				Vector2  onCanvas;
-				Vector2? last  = null;
-				var      color = _colors[name];
+				Vector2? last   = null;
+				var      config = _configs[name];
+				var      color  = config.Color;
 				foreach (var p in list.SkipLast(1).ToArray()) {
 					onCanvas = transform(p);
 					brush.FillCircle(onCanvas, r, color);

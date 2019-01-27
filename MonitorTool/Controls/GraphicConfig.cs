@@ -8,14 +8,48 @@ namespace MonitorTool.Controls {
 	///     图形配置
 	/// </summary>
 	public class GraphicConfig : BindableBase {
-		private Color  _color;
-		public  string Name;
+		public readonly string Name;
+		private         Color  _color;
+		private         int    _count = int.MaxValue;
 
-		public Color Color {
-			get => _color;
-			set => SetProperty(ref _color, value);
+		/// <summary>
+		///     构造器
+		/// </summary>
+		/// <param name="name">名字</param>
+		public GraphicConfig(string name) {
+			Name   = name;
+			_color = Functions.RandomColor;
 		}
 
-		public static Brush ToBrush(Color color) => new SolidColorBrush(color);
+		/// <summary>
+		///     显示颜色
+		/// </summary>
+		public Color Color {
+			get => _color;
+			set {
+				if (!SetProperty(ref _color, value)) return;
+				Notify(nameof(Brush));
+			}
+		}
+
+		/// <summary>
+		///     画笔
+		/// </summary>
+		public Brush Brush => new SolidColorBrush(_color);
+
+		public int Count {
+			get => _count;
+			set {
+				if (!SetProperty(ref _count, value)) return;
+				Notify(nameof(CountText));
+			}
+		}
+
+		public string CountText {
+			get => _count.ToString();
+			set {
+				if (int.TryParse(value, out var data)) Count = data;
+			}
+		}
 	}
 }

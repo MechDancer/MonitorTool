@@ -4,11 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using Windows.UI.Core;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using MechDancer.Common;
 using MechDancer.Framework.Net.Presets;
 using MonitorTool.Source;
+using static Windows.UI.Core.CoreDispatcherPriority;
 
 namespace MonitorTool.Controls {
 	/// <inheritdoc cref="Windows.UI.Xaml.Controls.UserControl" />
@@ -28,7 +29,7 @@ namespace MonitorTool.Controls {
 		public ProbeView() => InitializeComponent();
 
 		public ProbeView(IPEndPoint group) : this()
-			=> Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => Init(group));
+			=> Task.Run(async () => await Dispatcher.RunAsync(Normal, () => Init(group)));
 
 		public IPEndPoint Group => _probe.Group;
 

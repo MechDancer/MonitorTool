@@ -10,6 +10,13 @@ namespace MonitorTool.Source {
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
+		///     发布属性变化通知
+		/// </summary>
+		/// <param name="propertyName">属性名字</param>
+		protected void Notify(string propertyName)
+			=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+		/// <summary>
 		///     设置属性
 		/// </summary>
 		/// <param name="field">后台字段</param>
@@ -23,7 +30,7 @@ namespace MonitorTool.Source {
 			if (Equals(field, value)) return false;
 
 			field = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+			Notify(propertyName);
 			return true;
 		}
 	}

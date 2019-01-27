@@ -14,12 +14,30 @@
     <UserControl.Resources>
         <DataTemplate x:Key="ColorTemplate" x:DataType="local:GraphicConfig">
             <StackPanel Orientation="Horizontal">
-                <Button Background="{x:Bind local:GraphicConfig.ToBrush(Color), Mode=OneWay}"
+                <Button Background="{x:Bind Brush, Mode=OneWay}"
                         Width="32" Height="32" Margin="12,4">
                     <Button.Flyout>
                         <Flyout>
-                            <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
-                                         IsAlphaEnabled="True" />
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="显示点数" VerticalAlignment="Center" />
+                                <TextBox Text="{x:Bind CountText, Mode=TwoWay}"
+                                         Grid.Row="0" Grid.Column="1" Margin="4,0,0,4" />
+                                <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
+                                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                             IsAlphaEnabled="True"
+                                             IsAlphaTextInputVisible="False"
+                                             IsColorPreviewVisible="False"
+                                             IsColorChannelTextInputVisible="False"
+                                             IsHexInputVisible="False" />
+                            </Grid>
                         </Flyout>
                     </Button.Flyout>
                 </Button>
@@ -97,7 +115,7 @@
                           HorizontalAlignment="Stretch" Margin="2,4,0,4"
                           Grid.Row="3" Grid.Column="1" />
             <Button Content="背景"
-                    Background="{x:Bind local:GraphicConfig.ToBrush(ViewModelContext.Background), Mode=OneWay}"
+                    Background="{x:Bind ViewModelContext.BackgroundBrush, Mode=OneWay}"
                     HorizontalAlignment="Stretch" Margin="2,4,0,4"
                     Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button.Flyout>

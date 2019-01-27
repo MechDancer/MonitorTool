@@ -20,8 +20,8 @@ namespace MonitorTool.Pages {
 
 		public ProbePage() => InitializeComponent();
 
-		protected override void OnNavigatedTo(NavigationEventArgs e) {
-			View.Dispatcher.RunAsync
+		protected override async void OnNavigatedTo(NavigationEventArgs e) {
+			await View.Dispatcher.RunAsync
 				(Low, async () => {
 					foreach (var group in Memory) Add(group);
 					while (!_cancel.IsCancellationRequested) {
@@ -41,12 +41,12 @@ namespace MonitorTool.Pages {
 
 		protected override void OnNavigatedFrom(NavigationEventArgs e) => _cancel.Cancel();
 
-		private void Add(IPEndPoint group) {
+		private async void Add(IPEndPoint group) {
 			Debug.Assert(View.Items != null, "View.Items != null");
 			var view = new ProbeView(group);
 			view.CloseButtonClick += () => View.Items.Remove(view);
 			view.CloseButtonClick += () => Memory.Remove(view.Group);
-			View.Dispatcher.RunAsync(High, () => View.Items.Insert(View.Items.Count - 1, view));
+			await View.Dispatcher.RunAsync(High, () => View.Items.Insert(View.Items.Count - 1, view));
 		}
 	}
 }
