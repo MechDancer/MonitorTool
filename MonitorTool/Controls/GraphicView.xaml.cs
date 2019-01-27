@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Threading.Tasks.Dataflow;
 using Windows.Foundation;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -33,33 +34,34 @@ namespace MonitorTool.Controls {
 			  .ToList();
 
 		/// <summary>
-		/// 	设置颜色
+		///     设置颜色
 		/// </summary>
 		/// <param name="topic">话题名字</param>
 		public Color this[string topic] {
 			set {
 				var item = (MainList.Items ?? throw new MemberAccessException())
-				          .OfType<ColorItem>()
-				          .SingleOrDefault(it => it.Name == topic);
+						  .OfType<ColorItem>()
+						  .SingleOrDefault(it => it.Name == topic);
 				if (item == null) {
 					item = new ColorItem {
-						                     Name  = topic,
-						                     Color = value,
-						                     Update = it => {
-							                              _colors[it.Name] = it.Color;
-							                              Canvas2D.Invalidate();
-						                              }
-					                     };
+						Name  = topic,
+						Color = value,
+						Update = it => {
+							_colors[it.Name] = it.Color;
+							Canvas2D.Invalidate();
+						}
+					};
 					_colors[topic] = value;
 					MainList.Items.Add(item);
 					MainList.SelectedItems.Add(item);
-				} else
+				} else {
 					item.Color = value;
+				}
 			}
 		}
 
 		/// <summary>
-		/// 	线程安全地操作点列表
+		///     线程安全地操作点列表
 		/// </summary>
 		/// <param name="host">主机</param>
 		/// <param name="topic">话题</param>
@@ -72,28 +74,43 @@ namespace MonitorTool.Controls {
 			Canvas2D.Invalidate();
 		}
 
-		private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-			var selection = (string) e.AddedItems.Single();
-			if (_points.ContainsKey(selection)) return;
-			var ((name, topic), helper) =
-				Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
-			helper.Port.LinkTo(new ActionBlock<Vector2>(p => Operate(name, topic, list => list.Add(p))),
-			                   new DataflowLinkOptions());
-		}
-
 		#region Private
 
 		private RangeState _state = RangeState.Idle;
 		private Point      _origin, _current;
 		private DateTime   _pressTime;
 
+		#region Links
+
+		private readonly List<IDisposable> _links = new List<IDisposable>();
+
+		private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
+			var selection = (string) e.AddedItems.Single();
+			if (_points.ContainsKey(selection)) return;
+			var ((host, topic), helper) =
+				Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
+			helper.Port
+				  .LinkTo(new ActionBlock<Vector2>(p => Operate(host, topic, list => list.Add(p))),
+						  new DataflowLinkOptions())
+				  .Also(_links.Add);
+		}
+
+		private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
+			foreach (var link in _links) link.Dispose();
+			Canvas2D.RemoveFromVisualTree();
+			Canvas2D = null;
+		}
+
+		#endregion
+
 		public GraphicView(ViewModel context = null) {
 			InitializeComponent();
-			ViewModelContext = context ?? new ViewModel(Canvas2D);
+			ViewModelContext = context?.Also(it => it.Canvas = Canvas2D)
+							?? new ViewModel {Canvas = Canvas2D};
 		}
 
 		/// <summary>
-		/// 	计算范围
+		///     计算范围
 		/// </summary>
 		/// <param name="current">当前范围</param>
 		/// <param name="points">目标点集</param>
@@ -101,11 +118,13 @@ namespace MonitorTool.Controls {
 		/// <param name="y">确定纵轴</param>
 		/// <param name="allowShrink">允许范围缩小</param>
 		/// <returns>目标范围</returns>
-		private static (Vector2, Vector2) CalculateRange((Vector2, Vector2)   current,
-		                                                 IEnumerable<Vector2> points,
-		                                                 bool                 x,
-		                                                 bool                 y,
-		                                                 bool                 allowShrink) {
+		private static (Vector2, Vector2) CalculateRange(
+			(Vector2, Vector2)   current,
+			IEnumerable<Vector2> points,
+			bool                 x,
+			bool                 y,
+			bool                 allowShrink
+		) {
 			var (min, max) = current;
 			var x0 = float.MaxValue;
 			var x1 = float.MinValue;
@@ -142,29 +161,33 @@ namespace MonitorTool.Controls {
 						if (x1 <= max.X) {
 							x0 = min.X;
 							x1 = max.X;
-						} else
+						} else {
 							x0 = x1 - w;
-					} else
+						}
+					} else {
 						x1 = x0 + w;
+					}
 
 				if (y1 - y0 < h)
 					if (min.Y <= y0) {
 						if (y1 <= max.Y) {
 							y0 = min.Y;
 							y1 = max.Y;
-						} else
+						} else {
 							y0 = y1 - h;
-					} else
+						}
+					} else {
 						y1 = y0 + h;
+					}
 			}
 
 			return (new Vector2(x0, y0), new Vector2(x1, y1));
 		}
 
 		private static void Order(double    a,
-		                          double    b,
-		                          out float min,
-		                          out float max) {
+								  double    b,
+								  out float min,
+								  out float max) {
 			if (a < b) {
 				min = (float) a;
 				max = (float) b;
@@ -191,20 +214,19 @@ namespace MonitorTool.Controls {
 
 			// 排除不画的
 			var visible = MainList
-			             .SelectedItems
-			             .OfType<ColorItem>()
-			             .Select(it => it.Name)
-			             .ToArray();
+						 .SelectedItems
+						 .OfType<ColorItem>()
+						 .Select(it => it.Name)
+						 .ToArray();
 			var points = (from entry in _points
-			              where visible.Contains(entry.Key)
-			              where entry.Value.Any()
-			              select entry)
+						  where visible.Contains(entry.Key)
+						  where entry.Value.Any()
+						  select entry)
 			   .ToImmutableDictionary(it => it.Key,
-			                          it => {
-				                          var (_, list) = it;
-				                          lock (list) return list.ToImmutableList();
-			                          });
-
+									  it => {
+										  var (_, list) = it;
+										  lock (list) return list.ToImmutableList();
+									  });
 			// 自动范围
 			var range =
 				ViewModelContext.AutoMove
@@ -238,7 +260,7 @@ namespace MonitorTool.Controls {
 					brush.DrawLine(new Vector2(0, y),     new Vector2(width, y),      Colors.White);
 					brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1),  Colors.Black);
 					brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height),
-					               Colors.Black);
+								   Colors.Black);
 					var p = reverse(new Vector2(x, y));
 					brush.DrawText($"{p.X}, {p.Y}", x + 1, y - 23, Colors.Black);
 					brush.DrawText($"{p.X}, {p.Y}", x,     y - 24, Colors.White);
@@ -246,10 +268,10 @@ namespace MonitorTool.Controls {
 				case RangeState.Reset:
 					// 正在重新划定范围
 					brush.DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
-					                                    new Point(_current.X - 1, _current.Y - 1)),
-					                           0, 0, Colors.White);
+														new Point(_current.X - 1, _current.Y - 1)),
+											   0, 0, Colors.White);
 					brush.DrawRoundedRectangle(new Rect(_origin, _current),
-					                           0, 0, Colors.Black);
+											   0, 0, Colors.Black);
 					break;
 				case RangeState.Done:
 					// 确定范围
@@ -258,7 +280,7 @@ namespace MonitorTool.Controls {
 					Order(_origin.X, _current.X, out var x0, out var x1);
 					Order(_origin.Y, _current.Y, out var y0, out var y1);
 					ViewModelContext.Range = (reverse(new Vector2(x0, y1)),
-					                          reverse(new Vector2(x1, y0)));
+											  reverse(new Vector2(x1, y0)));
 					ViewModelContext.BuildTransform(out transform, out reverse);
 					break;
 				default:
@@ -273,6 +295,9 @@ namespace MonitorTool.Controls {
 				var tp1 = reverse(new Vector2(width, 0));
 				X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
 				Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
+
+				Block.Dispatcher.RunAsync(CoreDispatcherPriority.Low,
+										  () => Block.Text = $"{tp0}, {tp1}");
 			}
 
 			// 画点
@@ -282,10 +307,9 @@ namespace MonitorTool.Controls {
 				var      color = _colors[name];
 				foreach (var p in list.ToArray()) {
 					var onCanvas = transform(p);
-					args.DrawingSession.FillCircle(onCanvas, r, color);
+					brush.FillCircle(onCanvas, r, color);
 
-					if (last != null && ViewModelContext.Connection)
-						args.DrawingSession.DrawLine(last.Value, onCanvas, color, 1);
+					if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
 
 					last = onCanvas;
 				}
@@ -293,11 +317,6 @@ namespace MonitorTool.Controls {
 		}
 
 		#region Pointer
-
-		private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
-			Canvas2D.RemoveFromVisualTree();
-			Canvas2D = null;
-		}
 
 		private void MainList_OnSelectionChanged(object sender, SelectionChangedEventArgs e) => Canvas2D.Invalidate();
 
@@ -320,8 +339,8 @@ namespace MonitorTool.Controls {
 
 		private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
 			_state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
-				         ? RangeState.Normal
-				         : RangeState.Done;
+						 ? RangeState.Normal
+						 : RangeState.Done;
 			Canvas2D.Invalidate();
 		}
 
@@ -338,7 +357,7 @@ namespace MonitorTool.Controls {
 			var w = (float) Canvas2D.ActualWidth;
 			var h = (float) Canvas2D.ActualHeight;
 			ViewModelContext.Range = (Transform(new Vector2(0, h)),
-			                          Transform(new Vector2(w, 0)));
+									  Transform(new Vector2(w, 0)));
 
 			Canvas2D.Invalidate();
 		}

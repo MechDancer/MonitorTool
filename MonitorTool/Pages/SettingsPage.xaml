@@ -17,24 +17,29 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Text="IP地址" VerticalAlignment="Center" Margin="0,0,4,0" />
+        <TextBlock Text="IP地址" VerticalAlignment="Center" Margin="0,0,8,0" />
         <TextBlock Text="端口号" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" />
 
         <StackPanel Orientation="Horizontal"
                     Grid.Row="0" Grid.Column="1">
-            <TextBox Text="{x:Bind Path=Ip0, Mode=TwoWay}" Width="64" InputScope="Number" TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip0, Mode=TwoWay}" Width="64" InputScope="Number"
+                     TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=Ip1, Mode=TwoWay}" Width="64" InputScope="Number" TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip1, Mode=TwoWay}" Width="64" InputScope="Number"
+                     TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=Ip2, Mode=TwoWay}" Width="64" InputScope="Number" TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip2, Mode=TwoWay}" Width="64" InputScope="Number"
+                     TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=Ip3, Mode=TwoWay}" Width="64" InputScope="Number" TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip3, Mode=TwoWay}" Width="64" InputScope="Number"
+                     TextAlignment="Center" />
         </StackPanel>
 
-        <TextBox Text="{x:Bind Path=Port, Mode=TwoWay}" InputScope="Number" TextAlignment="Center"
-                 Margin="0,8" Grid.Row="1" Grid.Column="1" />
+        <TextBox Text="{x:Bind Path=_viewModel.Port, Mode=TwoWay}" InputScope="Number" TextAlignment="Center"
+                 Margin="0,8,0,0" Grid.Row="1" Grid.Column="1" />
     </Grid>
 </Page>

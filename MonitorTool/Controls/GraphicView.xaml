@@ -54,7 +54,7 @@
 
         <Border BorderBrush="SteelBlue" BorderThickness="1"
                 Grid.Row="0" Grid.Column="1">
-            <canvas:CanvasControl Name="Canvas2D" Draw="CanvasControl_OnDraw"
+            <canvas:CanvasControl x:Name="Canvas2D" Draw="CanvasControl_OnDraw"
                                   PointerPressed="Canvas2D_OnPointerPressed"
                                   PointerMoved="Canvas2D_OnPointerMoved"
                                   PointerReleased="Canvas2D_OnPointerReleased"

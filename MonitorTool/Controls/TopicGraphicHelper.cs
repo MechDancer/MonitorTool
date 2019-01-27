@@ -20,28 +20,28 @@ namespace MonitorTool.Controls {
 		public DimensionEnum Dimension = DimensionEnum.One;
 
 		public TopicGraphicHelper(string sender,
-		                          string topic)
+								  string topic)
 			=> Global.Instance
-			         .Receiver
-			         .Port
-			         .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
-				                 (it => Process(it.payload)),
-			                 it => it.sender == sender && it.topic == topic);
+					 .Receiver
+					 .Port
+					 .LinkTo(new ActionBlock<(string sender, string topic, byte[] payload)>
+								 (it => Process(it.payload)),
+							 it => it.sender == sender && it.topic == topic);
 
 		private void Process(byte[] payload) {
 			Vector2? v      = null;
-			var      stream = new MemoryStream(payload);
+			var      stream = new NetworkDataReader(new MemoryStream(payload));
 
 			switch (Dimension) {
 				case DimensionEnum.One:
 					switch (payload.Length) {
 						case sizeof(float):
 							v = new Vector2((float) ((DateTime.Now.Ticks - _time) / 1E7),
-							                stream.ReadFloat());
+											stream.ReadFloat());
 							break;
 						case sizeof(double):
 							v = new Vector2((float) ((DateTime.Now.Ticks - _time) / 1E7),
-							                (float) stream.ReadDouble());
+											(float) stream.ReadDouble());
 							break;
 					}
 
@@ -50,11 +50,11 @@ namespace MonitorTool.Controls {
 					switch (payload.Length) {
 						case 2 * sizeof(float):
 							v = new Vector2(stream.ReadFloat(),
-							                stream.ReadFloat());
+											stream.ReadFloat());
 							break;
 						case 2 * sizeof(double):
 							v = new Vector2((float) stream.ReadDouble(),
-							                (float) stream.ReadDouble());
+											(float) stream.ReadDouble());
 							break;
 					}
 
