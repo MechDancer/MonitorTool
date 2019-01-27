@@ -26,20 +26,21 @@
 
         <StackPanel Orientation="Horizontal"
                     Grid.Row="0" Grid.Column="1">
-            <TextBox Text="{x:Bind Path=_viewModel.Ip0, Mode=TwoWay}" Width="64" InputScope="Number"
-                     TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip0, Mode=TwoWay}" GotFocus="UIElement_OnGotFocus"
+                     Width="64" InputScope="Number" TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=_viewModel.Ip1, Mode=TwoWay}" Width="64" InputScope="Number"
-                     TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip1, Mode=TwoWay}" GotFocus="UIElement_OnGotFocus"
+                     Width="64" InputScope="Number" TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=_viewModel.Ip2, Mode=TwoWay}" Width="64" InputScope="Number"
-                     TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip2, Mode=TwoWay}" GotFocus="UIElement_OnGotFocus"
+                     Width="64" InputScope="Number" TextAlignment="Center" />
             <TextBlock Text="." Margin="4,0" VerticalAlignment="Bottom" />
-            <TextBox Text="{x:Bind Path=_viewModel.Ip3, Mode=TwoWay}" Width="64" InputScope="Number"
-                     TextAlignment="Center" />
+            <TextBox Text="{x:Bind Path=_viewModel.Ip3, Mode=TwoWay}" GotFocus="UIElement_OnGotFocus"
+                     Width="64" InputScope="Number" TextAlignment="Center" />
         </StackPanel>
 
-        <TextBox Text="{x:Bind Path=_viewModel.Port, Mode=TwoWay}" InputScope="Number" TextAlignment="Center"
+        <TextBox Text="{x:Bind Path=_viewModel.Port, Mode=TwoWay}" GotFocus="UIElement_OnGotFocus"
+                 InputScope="Number" TextAlignment="Center"
                  Margin="0,8,0,0" Grid.Row="1" Grid.Column="1" />
     </Grid>
 </Page>

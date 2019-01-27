@@ -21,29 +21,30 @@ namespace MonitorTool.Pages {
 		protected override void OnNavigatedTo(NavigationEventArgs e)
 			=> _link = Global.Instance.Receiver.Port.LinkTo
 				   (new ActionBlock<(string, string, byte[])>
-					    (it => {
-						     var (sender, topic, _) = it;
-						     var root =
-							     TopicView.RootNodes.SingleOrDefault(x => (string) x.Content == sender);
-						     if (root == null) {
-							     root = new TreeViewNode {
-								                             Content = sender,
-								                             Children = {
-									                                        new TreeViewNode {
-										                                                         Content
-											                                                         = topic
-									                                                         }
-								                                        }
-							                             };
-							     TopicView.RootNodes.Add(root);
-						     } else if (root.Children.None(x => (string) x.Content == topic))
-							     root.Children.Add(new TreeViewNode {Content = topic});
-					     },
-					     new ExecutionDataflowBlockOptions {
-						                                       TaskScheduler = TaskScheduler
-							                                      .FromCurrentSynchronizationContext()
-					                                       }
-					    ));
+						(it => {
+							 var (sender, topic, _) = it;
+							 var root =
+								 TopicView.RootNodes.SingleOrDefault(x => (string) x.Content == sender);
+							 if (root == null) {
+								 root = new TreeViewNode {
+									 Content = sender,
+									 Children = {
+										 new TreeViewNode {
+											 Content
+												 = topic
+										 }
+									 }
+								 };
+								 TopicView.RootNodes.Add(root);
+							 } else if (root.Children.None(x => (string) x.Content == topic)) {
+								 root.Children.Add(new TreeViewNode {Content = topic});
+							 }
+						 },
+						 new ExecutionDataflowBlockOptions {
+							 TaskScheduler = TaskScheduler
+								.FromCurrentSynchronizationContext()
+						 }
+						));
 
 		protected override void OnNavigatedFrom(NavigationEventArgs e) => _link?.Dispose();
 
@@ -79,11 +80,11 @@ namespace MonitorTool.Pages {
 					SetProperty(ref _topic, value);
 					if (string.IsNullOrWhiteSpace(value)) return;
 					Dim = Global.Instance
-					            .Helpers
-					            .TryGetValue((Host, Topic), out var helper)
+								.Helpers
+								.TryGetValue((Host, Topic), out var helper)
 					   && helper.Dimension == TopicGraphicHelper.DimensionEnum.Two
-						      ? "二维"
-						      : "一维";
+							  ? "二维"
+							  : "一维";
 				}
 			}
 
@@ -93,11 +94,11 @@ namespace MonitorTool.Pages {
 					SetProperty(ref _dim, value);
 					if (string.IsNullOrWhiteSpace(_topic)) return;
 					Global.Instance
-					      .Helpers
-					      .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic))
-					      .Dimension = value == "一维"
-						                   ? TopicGraphicHelper.DimensionEnum.One
-						                   : TopicGraphicHelper.DimensionEnum.Two;
+						  .Helpers
+						  .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic))
+						  .Dimension = value == "一维"
+										   ? TopicGraphicHelper.DimensionEnum.One
+										   : TopicGraphicHelper.DimensionEnum.Two;
 				}
 			}
 		}

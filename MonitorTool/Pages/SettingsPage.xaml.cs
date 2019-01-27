@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 using MonitorTool.Source;
 
@@ -13,6 +15,8 @@ namespace MonitorTool.Pages {
 			=> _viewModel.Group = Global.Instance.Group ?? new IPEndPoint(IPAddress.Any, 0);
 
 		protected override void OnNavigatedFrom(NavigationEventArgs e) => Global.Instance.Group = _viewModel.Group;
+
+		private void UIElement_OnGotFocus(object sender, RoutedEventArgs e) => ((TextBox) sender).SelectAll();
 
 		private class ViewModel : BindableBase {
 			private byte   _ip0, _ip1, _ip2, _ip3;

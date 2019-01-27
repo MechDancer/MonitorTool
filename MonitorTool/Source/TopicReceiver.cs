@@ -9,10 +9,10 @@ using MechDancer.Framework.Net.Resources;
 
 namespace MonitorTool.Source {
 	/// <summary>
-	/// 	话题接收者
+	///     话题接收者
 	/// </summary>
 	public class TopicReceiver : UniqueComponent<TopicReceiver>,
-	                             IMulticastListener {
+								 IMulticastListener {
 		private static readonly byte[] InterestSet = {(byte) UdpCmd.TopicMessage};
 
 		public readonly BroadcastBlock<(string sender, string topic, byte[] payload)>

@@ -13,7 +13,7 @@ using MonitorTool.Source;
 namespace MonitorTool.Controls {
 	/// <inheritdoc cref="Windows.UI.Xaml.Controls.UserControl" />
 	/// <summary>
-	/// 	探针界面
+	///     探针界面
 	/// </summary>
 	public sealed partial class ProbeView {
 		public delegate void CloseButtonClickHandler();
@@ -37,16 +37,17 @@ namespace MonitorTool.Controls {
 			if (_probe == null) {
 				_probe = new Probe(endPoint);
 				new Thread(() => {
-					           while (_running) _probe.Invoke();
-				           }) {IsBackground = true}.Start();
-			} else
+					while (_running) _probe.Invoke();
+				}) {IsBackground = true}.Start();
+			} else {
 				_probe = new Probe(endPoint);
+			}
 
 			(_pacemaker = new Pacemaker(endPoint)).Activate();
 		}
 
 		/// <summary>
-		/// 	探针刷新到界面显示
+		///     探针刷新到界面显示
 		/// </summary>
 		/// <param name="timeout">超时时间</param>
 		public void Refresh(TimeSpan timeout) => _view.Group = _probe[timeout].ToList();

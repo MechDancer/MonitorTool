@@ -8,7 +8,6 @@ using System.Numerics;
 using System.Threading.Tasks.Dataflow;
 using Windows.Foundation;
 using Windows.UI;
-using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -295,24 +294,25 @@ namespace MonitorTool.Controls {
 				var tp1 = reverse(new Vector2(width, 0));
 				X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
 				Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
-
-				Block.Dispatcher.RunAsync(CoreDispatcherPriority.Low,
-										  () => Block.Text = $"{tp0}, {tp1}");
 			}
 
 			// 画点
 			var r = (int) Math.Min(width, height) / 400 + 2;
 			foreach (var (name, list) in points) {
+				Vector2  onCanvas;
 				Vector2? last  = null;
 				var      color = _colors[name];
-				foreach (var p in list.ToArray()) {
-					var onCanvas = transform(p);
+				foreach (var p in list.SkipLast(1).ToArray()) {
+					onCanvas = transform(p);
 					brush.FillCircle(onCanvas, r, color);
 
 					if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
-
 					last = onCanvas;
 				}
+
+				onCanvas = transform(list.Last());
+				brush.FillCircle(onCanvas, r + 3, color);
+				if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
 			}
 		}
 

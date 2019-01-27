@@ -8,7 +8,7 @@ using MonitorTool.Controls;
 
 namespace MonitorTool.Pages {
 	public sealed partial class GraphicPage {
-		private static Dictionary<string, GraphicView.ViewModel>
+		private static readonly Dictionary<string, GraphicView.ViewModel>
 			Memory = new Dictionary<string, GraphicView.ViewModel>();
 
 		public GraphicPage() => InitializeComponent();
@@ -21,12 +21,12 @@ namespace MonitorTool.Pages {
 				var graphic = new GraphicView(viewModel);
 				Pivot.Items.Add(new PivotItem {Header = topic, Content = graphic});
 				GridView.Items.Insert(GridView.Items.Count - 1,
-				                      new GridViewItem {
-					                                       Height  = 200,
-					                                       Width   = 200,
-					                                       Tag     = topic,
-					                                       Content = new TextBlock {Text = topic, FontSize = 36},
-				                                       });
+									  new GridViewItem {
+										  Height  = 200,
+										  Width   = 200,
+										  Tag     = topic,
+										  Content = new TextBlock {Text = topic, FontSize = 36}
+									  });
 			}
 		}
 
@@ -34,19 +34,18 @@ namespace MonitorTool.Pages {
 			Debug.Assert(GridView.Items != null, "GridView.Items != null");
 			Debug.Assert(Pivot.Items    != null, "Pivot.Items != null");
 
-			if (Pivot.Items.Any(it => it is PivotItem x && (string) x.Header == topic))
-				return false;
+			if (Pivot.Items.Any(it => it is PivotItem x && (string) x.Header == topic)) return false;
 
 			var graphic = new GraphicView();
 			Memory[topic] = graphic.ViewModelContext;
 			Pivot.Items.Add(new PivotItem {Header = topic, Content = graphic});
 			GridView.Items.Insert(GridView.Items.Count - 1,
-			                      new GridViewItem {
-				                                       Height  = 200,
-				                                       Width   = 200,
-				                                       Tag     = topic,
-				                                       Content = new TextBlock {Text = topic, FontSize = 36},
-			                                       });
+								  new GridViewItem {
+									  Height  = 200,
+									  Width   = 200,
+									  Tag     = topic,
+									  Content = new TextBlock {Text = topic, FontSize = 36}
+								  });
 			return true;
 		}
 

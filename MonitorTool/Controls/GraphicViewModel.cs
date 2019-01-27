@@ -18,8 +18,10 @@ namespace MonitorTool.Controls {
 			private bool  _connection;
 			private bool  _proportional;
 
-			private float         _x0, _x1, _y0, _y1;
-			public  CanvasControl Canvas;
+			private float _x0, _x1, _y0, _y1;
+
+			public byte          BorderWidth = 10;
+			public CanvasControl Canvas;
 
 			/// <summary>
 			///     设置最小绘图范围
@@ -82,15 +84,17 @@ namespace MonitorTool.Controls {
 
 			public void BuildTransform(out Func<Vector2, Vector2> transform,
 									   out Func<Vector2, Vector2> reverse) {
-				var (p0, p1) = Range;
 				var width  = (float) Canvas.ActualWidth;
 				var height = (float) Canvas.ActualHeight;
-				var size   = p1 - p0;
-				var c0     = (p0 + p1)                  / 2;
-				var c1     = new Vector2(width, height) / 2;
 
-				var kX                = width  / size.X;
-				var kY                = height / size.Y;
+				var (p0, p1) = Range;
+				var size = p1 - p0;
+				var c0   = (p0 + p1)                  / 2;
+				var c1   = new Vector2(width, height) / 2;
+
+				var kX = (width  - 2 * BorderWidth) / size.X;
+				var kY = (height - 2 * BorderWidth) / size.Y;
+
 				if (_proportional) kX = kY = Math.Min(kX, kY);
 
 				transform = p => (p - c0).Let(move => new Vector2(move.X * kX, move.Y * -kY) + c1);
