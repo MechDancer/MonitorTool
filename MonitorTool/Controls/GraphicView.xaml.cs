@@ -199,7 +199,7 @@ namespace MonitorTool.Controls {
 						 .ToHashSet();
 			var points = (from entry in _points
 						  where visible.Contains(entry.Key)
-						  where entry.Value.Any()
+						  where entry.Value.Count > 0
 						  select entry)
 			   .ToImmutableDictionary(it => it.Key,
 									  it => {
