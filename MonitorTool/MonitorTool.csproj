@@ -127,7 +127,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-      <Compile Include="Controls\ColorItem.cs"/>
+      <Compile Include="Controls\GraphicConfig.cs"/>
       <Compile Include="Controls\GraphicView.xaml.cs">
           <DependentUpon>GraphicView.xaml</DependentUpon>
       </Compile>

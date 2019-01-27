@@ -12,9 +12,9 @@
              Unloaded="GraphicView_OnUnloaded">
 
     <UserControl.Resources>
-        <DataTemplate x:Key="ColorTemplate" x:DataType="local:ColorItem">
+        <DataTemplate x:Key="ColorTemplate" x:DataType="local:GraphicConfig">
             <StackPanel Orientation="Horizontal">
-                <Button Background="{x:Bind local:ColorItem.ToBrush(Color), Mode=OneWay}"
+                <Button Background="{x:Bind local:GraphicConfig.ToBrush(Color), Mode=OneWay}"
                         Width="32" Height="32" Margin="12,4">
                     <Button.Flyout>
                         <Flyout>
@@ -97,7 +97,7 @@
                           HorizontalAlignment="Stretch" Margin="2,4,0,4"
                           Grid.Row="3" Grid.Column="1" />
             <Button Content="背景"
-                    Background="{x:Bind local:ColorItem.ToBrush(ViewModelContext.Background), Mode=OneWay}"
+                    Background="{x:Bind local:GraphicConfig.ToBrush(ViewModelContext.Background), Mode=OneWay}"
                     HorizontalAlignment="Stretch" Margin="2,4,0,4"
                     Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button.Flyout>

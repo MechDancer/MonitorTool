@@ -39,16 +39,15 @@ namespace MonitorTool.Controls {
 		public Color this[string topic] {
 			set {
 				var item = (MainList.Items ?? throw new MemberAccessException())
-						  .OfType<ColorItem>()
+						  .OfType<GraphicConfig>()
 						  .SingleOrDefault(it => it.Name == topic);
 				if (item == null) {
-					item = new ColorItem {
-						Name  = topic,
-						Color = value,
-						Update = it => {
-							_colors[it.Name] = it.Color;
-							Canvas2D.Invalidate();
-						}
+					item = new GraphicConfig {Name = topic, Color = value};
+					item.PropertyChanged += (sender, args) => {
+						var it = (GraphicConfig) sender;
+						if (args.PropertyName != nameof(GraphicConfig.Color)) return;
+						_colors[it.Name] = it.Color;
+						Canvas2D.Invalidate();
 					};
 					_colors[topic] = value;
 					MainList.Items.Add(item);
@@ -214,7 +213,7 @@ namespace MonitorTool.Controls {
 			// 排除不画的
 			var visible = MainList
 						 .SelectedItems
-						 .OfType<ColorItem>()
+						 .OfType<GraphicConfig>()
 						 .Select(it => it.Name)
 						 .ToArray();
 			var points = (from entry in _points
@@ -297,7 +296,7 @@ namespace MonitorTool.Controls {
 			}
 
 			// 画点
-			var r = (int) Math.Min(width, height) / 400 + 2;
+			var r = Math.Min(width, height) / 400 + 2;
 			foreach (var (name, list) in points) {
 				Vector2  onCanvas;
 				Vector2? last  = null;
@@ -311,7 +310,7 @@ namespace MonitorTool.Controls {
 				}
 
 				onCanvas = transform(list.Last());
-				brush.FillCircle(onCanvas, r + 3, color);
+				brush.FillCircle(onCanvas, 1.5f * r + 1, color);
 				if (last != null && ViewModelContext.Connection) brush.DrawLine(last.Value, onCanvas, color, 1);
 			}
 		}
