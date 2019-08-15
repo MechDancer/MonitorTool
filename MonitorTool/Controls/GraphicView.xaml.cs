@@ -58,18 +58,30 @@ namespace MonitorTool.Controls {
 
 		private readonly List<IDisposable> _links = new List<IDisposable>();
 
-		private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-			var selection = (string) e.AddedItems.Single();
-			if (_points.ContainsKey(selection)) return;
-			var ((host, topic), helper) =
-				Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
-			helper.Port
-				  .LinkTo(new ActionBlock<Vector2>(p => Operate(host, topic, list => list.Add(p))),
-						  new DataflowLinkOptions())
-				  .Also(_links.Add);
-		}
+        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
+            var selection = (string)e.AddedItems.Single();
+            if (_points.ContainsKey(selection)) return;
+            var ((host, topic), helper) =
+                Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
+            helper.Port
+                  .LinkTo(new ActionBlock<(TopicGraphicHelper.GraphType, List<Vector2>)>(
+                      p => Operate(host, topic, list => {
+                          var (type, l) = p;
+                          switch (type) {
+                              case TopicGraphicHelper.GraphType.OneDemension:
+                              case TopicGraphicHelper.GraphType.TwoDemension:
+                                  list.Add(l[0]);
+                                  break;
+                              case TopicGraphicHelper.GraphType.Frame:
+                                  list.Clear();
+                                  list.AddRange(l);
+                                  break;
+                          }
+                      })), new DataflowLinkOptions())
+                  .Also(_links.Add);
+        }
 
-		private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
+        private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
 			foreach (var link in _links) link.Dispose();
 			Canvas2D.RemoveFromVisualTree();
 			Canvas2D = null;
@@ -347,8 +359,8 @@ namespace MonitorTool.Controls {
 
 		private enum RangeState : byte { Idle, Normal, Reset, Done }
 
-		#endregion
+        #endregion
 
-		#endregion
-	}
+        #endregion
+    }
 }

@@ -75,32 +75,40 @@ namespace MonitorTool.Pages {
 			}
 
 			public string Topic {
-				get => _topic;
-				set {
-					SetProperty(ref _topic, value);
-					if (string.IsNullOrWhiteSpace(value)) return;
-					Dim = Global.Instance
-								.Helpers
-								.TryGetValue((Host, Topic), out var helper)
-					   && helper.Dimension == TopicGraphicHelper.DimensionEnum.Two
-							  ? "二维"
-							  : "一维";
-				}
-			}
+                get => _topic;
+                set {
+                    SetProperty(ref _topic, value);
+                    if (string.IsNullOrWhiteSpace(value)) return;
+                    Dim = Global.Instance.Helpers.TryGetValue((Host, Topic), out var helper)
+                                ? TopicGraphicHelper.TypeName(helper.Type)
+                                : "未定义";
+                }
+            }
 
 			public string Dim {
 				get => _dim;
 				set {
 					SetProperty(ref _dim, value);
 					if (string.IsNullOrWhiteSpace(_topic)) return;
-					Global.Instance
-						  .Helpers
-						  .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic))
-						  .Dimension = value == "一维"
-										   ? TopicGraphicHelper.DimensionEnum.One
-										   : TopicGraphicHelper.DimensionEnum.Two;
-				}
-			}
-		}
-	}
+                    var helper =                        Global
+                        .Instance
+                          .Helpers
+                          .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic));
+                    switch (value) {
+                        case "一维":
+                            helper.Type = TopicGraphicHelper.GraphType.OneDemension;
+                            break;
+                        case "二维":
+                            helper.Type = TopicGraphicHelper.GraphType.TwoDemension;
+                            break;
+                        case "单帧":
+                            helper.Type = TopicGraphicHelper.GraphType.Frame;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
 }
