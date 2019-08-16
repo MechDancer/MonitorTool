@@ -19,6 +19,7 @@
             <ComboBox Header="数据格式" Margin="8" SelectedItem="{x:Bind _viewModel.Dim, Mode=TwoWay}">
                 <x:String>一维</x:String>
                 <x:String>二维</x:String>
+                <x:String>位姿</x:String>
                 <x:String>单帧</x:String>
             </ComboBox>
         </StackPanel>

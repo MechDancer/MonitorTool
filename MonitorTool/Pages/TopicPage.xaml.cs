@@ -96,10 +96,13 @@ namespace MonitorTool.Pages {
                           .GetOrAdd((_host, _topic), new TopicGraphicHelper(_host, _topic));
                     switch (value) {
                         case "一维":
-                            helper.Type = TopicGraphicHelper.GraphType.OneDemension;
+                            helper.Type = TopicGraphicHelper.GraphType.OneDimension;
                             break;
                         case "二维":
-                            helper.Type = TopicGraphicHelper.GraphType.TwoDemension;
+                            helper.Type = TopicGraphicHelper.GraphType.TwoDimension;
+                            break;
+                        case "位姿":
+                            helper.Type = TopicGraphicHelper.GraphType.Pose;
                             break;
                         case "单帧":
                             helper.Type = TopicGraphicHelper.GraphType.Frame;

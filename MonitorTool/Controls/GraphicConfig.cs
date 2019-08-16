@@ -5,7 +5,7 @@ using MonitorTool.Source;
 namespace MonitorTool.Controls {
 	/// <inheritdoc />
 	/// <summary>
-	///     图形配置
+	/// 图形配置
 	/// </summary>
 	public class GraphicConfig : BindableBase {
 		public readonly string Name;
@@ -13,7 +13,7 @@ namespace MonitorTool.Controls {
 		private         int    _count = int.MaxValue;
 
 		/// <summary>
-		///     构造器
+		/// 构造器
 		/// </summary>
 		/// <param name="name">名字</param>
 		public GraphicConfig(string name) {
@@ -22,7 +22,7 @@ namespace MonitorTool.Controls {
 		}
 
 		/// <summary>
-		///     显示颜色
+		/// 显示颜色
 		/// </summary>
 		public Color Color {
 			get => _color;
@@ -33,10 +33,13 @@ namespace MonitorTool.Controls {
 		}
 
 		/// <summary>
-		///     画笔
+		/// 画笔
 		/// </summary>
 		public Brush Brush => new SolidColorBrush(_color);
 
+        /// <summary>
+        /// 显示数量
+        /// </summary>
 		public int Count {
 			get => _count;
 			set {
