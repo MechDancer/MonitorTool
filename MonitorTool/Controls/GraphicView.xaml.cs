@@ -219,12 +219,25 @@ namespace MonitorTool.Controls {
                          .ToHashSet();
             var points = (from entry in _points
                           where visible.Contains(entry.Key)
-                          where entry.Value.Count > 0
                           select entry)
+               .Where(it => {
+                   var (topic, list) = it;
+                   var count = _configs[topic].Count;
+                   if (count > 0) return true;
+                   if (count < 0) {
+                       list.Clear();
+                       _configs[topic].Count = count = -count;
+                   }
+                   return false;
+               })
                .ToImmutableDictionary(it => it.Key,
                                       it => {
                                           var (topic, list) = it;
                                           var count = _configs[topic].Count;
+                                          if (count < 0) {
+                                              list.Clear();
+                                              _configs[topic].Count = count = -count;
+                                          }
                                           lock (list) return list.TakeLast(count).ToImmutableList();
                                       });
             if (points.None()) return;
@@ -382,6 +395,11 @@ namespace MonitorTool.Controls {
                                       Transform(new Vector2(w, 0)));
 
             Canvas2D.Invalidate();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            var config = (e.OriginalSource as Control)?.DataContext as GraphicConfig;
+            config.Count *= -1;
         }
 
         private enum RangeState : byte {

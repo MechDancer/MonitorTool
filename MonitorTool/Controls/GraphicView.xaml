@@ -12,7 +12,7 @@
              Unloaded="GraphicView_OnUnloaded">
 
     <UserControl.Resources>
-        <DataTemplate x:Key="ColorTemplate" x:DataType="local:GraphicConfig">
+        <DataTemplate x:Key="GraphConfigTemplate" x:DataType="local:GraphicConfig">
             <StackPanel Orientation="Horizontal">
                 <Button Background="{x:Bind Brush, Mode=OneWay}"
                         Width="32" Height="32" Margin="12,4">
@@ -26,12 +26,16 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="显示点数" VerticalAlignment="Center" />
                                 <TextBox Text="{x:Bind CountText, Mode=TwoWay}"
                                          Grid.Row="0" Grid.Column="1" Margin="4,0,0,4" />
+                                <Button Content="清除"
+                                        Click="Button_Click"
+                                        Grid.Row="0" Grid.Column="2"/>
                                 <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
-                                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                              IsAlphaEnabled="True"
                                              IsAlphaTextInputVisible="False"
                                              IsColorPreviewVisible="False"
@@ -126,7 +130,7 @@
                 </Button.Flyout>
             </Button>
             <ListView Name="MainList"
-                      ItemTemplate="{StaticResource ColorTemplate}"
+                      ItemTemplate="{StaticResource GraphConfigTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple"
                       Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
