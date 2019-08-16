@@ -57,13 +57,13 @@ namespace MonitorTool.Controls {
                 case GraphType.OneDimension:
                     switch (payload.Length) {
                         case sizeof(float):
-                            frame.Add(new Vector3((float) ((DateTime.Now.Ticks - _time) / 1E7),
+                            frame.Add(new Vector3((float)((DateTime.Now.Ticks - _time) / 1E7),
                                                   stream.ReadFloat(),
                                                   float.NaN));
                             break;
                         case sizeof(double):
-                            frame.Add(new Vector3((float) ((DateTime.Now.Ticks - _time) / 1E7),
-                                                  (float) stream.ReadDouble(),
+                            frame.Add(new Vector3((float)((DateTime.Now.Ticks - _time) / 1E7),
+                                                  (float)stream.ReadDouble(),
                                                   float.NaN));
                             break;
                     }
@@ -71,14 +71,14 @@ namespace MonitorTool.Controls {
                     break;
                 case GraphType.TwoDimension:
                     switch (payload.Length) {
-                        case sizeof(float):
+                        case 2 * sizeof(float):
                             frame.Add(new Vector3(stream.ReadFloat(),
                                                   stream.ReadFloat(),
                                                   float.NaN));
                             break;
-                        case sizeof(double):
-                            frame.Add(new Vector3((float) stream.ReadDouble(),
-                                                  (float) stream.ReadDouble(),
+                        case 2 * sizeof(double):
+                            frame.Add(new Vector3((float)stream.ReadDouble(),
+                                                  (float)stream.ReadDouble(),
                                                   float.NaN));
                             break;
                     }

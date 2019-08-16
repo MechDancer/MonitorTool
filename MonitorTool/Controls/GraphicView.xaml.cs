@@ -41,7 +41,7 @@ namespace MonitorTool.Controls {
         /// <param name="topic">话题</param>
         /// <param name="action">对列表的操作</param>
         public void Operate(string host, string topic, Action<List<Vector3>> action) {
-            var id   = $"{host}: {topic}";
+            var id = $"{host}: {topic}";
             var list = _points.GetOrAdd(id, new List<Vector3>());
             lock (list) action(list);
 
@@ -51,15 +51,15 @@ namespace MonitorTool.Controls {
         #region Private
 
         private RangeState _state = RangeState.Idle;
-        private Point      _origin, _current;
-        private DateTime   _pressTime;
+        private Point _origin, _current;
+        private DateTime _pressTime;
 
         #region Links
 
         private readonly List<IDisposable> _links = new List<IDisposable>();
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-            var selection = (string) e.AddedItems.Single();
+            var selection = (string)e.AddedItems.Single();
             if (_points.ContainsKey(selection)) return;
             var ((host, topic), helper) =
                 Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
@@ -93,7 +93,7 @@ namespace MonitorTool.Controls {
         public GraphicView(GraphicViewModel context = null) {
             InitializeComponent();
             ViewModelContext = context?.Also(it => it.Canvas = Canvas2D)
-                            ?? new GraphicViewModel {Canvas = Canvas2D};
+                            ?? new GraphicViewModel { Canvas = Canvas2D };
         }
 
         /// <summary>
@@ -106,11 +106,11 @@ namespace MonitorTool.Controls {
         /// <param name="allowShrink">允许范围缩小</param>
         /// <returns>目标范围</returns>
         private static (Vector2, Vector2) CalculateRange(
-            (Vector2, Vector2)   current,
+            (Vector2, Vector2) current,
             IEnumerable<Vector3> points,
-            bool                 x,
-            bool                 y,
-            bool                 allowShrink
+            bool x,
+            bool y,
+            bool allowShrink
         ) {
             var (min, max) = current;
             var x0 = float.MaxValue;
@@ -124,8 +124,7 @@ namespace MonitorTool.Controls {
                     if (vector2.X < x0) x0 = vector2.X;
                     if (vector2.X > x1) x1 = vector2.X;
                 }
-            }
-            else {
+            } else {
                 x0 = min.X;
                 x1 = max.X;
             }
@@ -135,8 +134,7 @@ namespace MonitorTool.Controls {
                     if (vector2.Y < y0) y0 = vector2.Y;
                     if (vector2.Y > y1) y1 = vector2.Y;
                 }
-            }
-            else {
+            } else {
                 y0 = min.Y;
                 y1 = max.Y;
             }
@@ -150,12 +148,10 @@ namespace MonitorTool.Controls {
                         if (x1 <= max.X) {
                             x0 = min.X;
                             x1 = max.X;
-                        }
-                        else {
+                        } else {
                             x0 = x1 - w;
                         }
-                    }
-                    else {
+                    } else {
                         x1 = x0 + w;
                     }
 
@@ -164,12 +160,10 @@ namespace MonitorTool.Controls {
                         if (y1 <= max.Y) {
                             y0 = min.Y;
                             y1 = max.Y;
-                        }
-                        else {
+                        } else {
                             y0 = y1 - h;
                         }
-                    }
-                    else {
+                    } else {
                         y1 = y0 + h;
                     }
             }
@@ -184,17 +178,16 @@ namespace MonitorTool.Controls {
         /// <param name="b">数字2</param>
         /// <param name="min">较小的</param>
         /// <param name="max">较大的</param>
-        private static void Order(double    a,
-                                  double    b,
+        private static void Order(double a,
+                                  double b,
                                   out float min,
                                   out float max) {
             if (a < b) {
-                min = (float) a;
-                max = (float) b;
-            }
-            else {
-                min = (float) b;
-                max = (float) a;
+                min = (float)a;
+                max = (float)b;
+            } else {
+                min = (float)b;
+                max = (float)a;
             }
         }
 
@@ -220,26 +213,22 @@ namespace MonitorTool.Controls {
             var points = (from entry in _points
                           where visible.Contains(entry.Key)
                           select entry)
-               .Where(it => {
+               .SelectNotNull(it => {
                    var (topic, list) = it;
+
                    var count = _configs[topic].Count;
-                   if (count > 0) return true;
+                   if (count > 0)
+                       lock (list)
+                           return Tuple.Create(topic, list.TakeLast(count).ToImmutableList());
+
                    if (count < 0) {
                        list.Clear();
-                       _configs[topic].Count = count = -count;
+                       _configs[topic].Count = -count;
                    }
-                   return false;
+
+                   return null;
                })
-               .ToImmutableDictionary(it => it.Key,
-                                      it => {
-                                          var (topic, list) = it;
-                                          var count = _configs[topic].Count;
-                                          if (count < 0) {
-                                              list.Clear();
-                                              _configs[topic].Count = count = -count;
-                                          }
-                                          lock (list) return list.TakeLast(count).ToImmutableList();
-                                      });
+               .ToImmutableDictionary(it => it.Item1, it => it.Item2);
             if (points.None()) return;
 
             // 自动范围
