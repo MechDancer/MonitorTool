@@ -23,9 +23,6 @@ namespace MonitorTool {
 					case "网络诊断":
 						MainFrame.Navigate(typeof(ProbePage));
 						break;
-					case "话题监视":
-						MainFrame.Navigate(typeof(TopicPage));
-						break;
 					case "绘图":
 						MainFrame.Navigate(typeof(GraphicPage));
 						break;

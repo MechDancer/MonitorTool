@@ -138,7 +138,6 @@
     <Compile Include="Controls\ProbeView.xaml.cs">
       <DependentUpon>ProbeView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TopicGraphicHelper.cs" />
     <Compile Include="Controls\TopicSelector.xaml.cs">
       <DependentUpon>TopicSelector.xaml</DependentUpon>
     </Compile>
@@ -154,21 +153,18 @@
     <Compile Include="Pages\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\TopicPage.xaml.cs">
-      <DependentUpon>TopicPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\BindableBase.cs" />
     <Compile Include="Source\Extensions.cs" />
     <Compile Include="Source\Functions.cs" />
     <Compile Include="Source\Global.cs" />
+    <Compile Include="Source\TopicConfig.cs" />
     <Compile Include="Source\TopicReceiver.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="MonitorTool_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\BadgeLogo.scale-100.png" />
@@ -264,10 +260,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\SettingsPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\TopicPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

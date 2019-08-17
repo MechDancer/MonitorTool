@@ -28,58 +28,39 @@ namespace MonitorTool.Controls {
         private IEnumerable<string> Topics
             => Global
               .Instance
-              .Helpers
+              .Receiver
+              .Ports
               .Keys
-              .Select(it => $"{it.Item1}: {it.Item2}")
+              .Select(it => it.ToString())
               .WhereNot(it => _points.ContainsKey(it))
               .ToList();
-
-        /// <summary>
-        ///     线程安全地操作点列表
-        /// </summary>
-        /// <param name="host">主机</param>
-        /// <param name="topic">话题</param>
-        /// <param name="action">对列表的操作</param>
-        public void Operate(string host, string topic, Action<List<Vector3>> action) {
-            var id = $"{host}: {topic}";
-            var list = _points.GetOrAdd(id, new List<Vector3>());
-            lock (list) action(list);
-
-            Canvas2D.Invalidate();
-        }
 
         #region Private
 
         private RangeState _state = RangeState.Idle;
-        private Point _origin, _current;
-        private DateTime _pressTime;
+        private Point      _origin, _current;
+        private DateTime   _pressTime;
 
         #region Links
 
         private readonly List<IDisposable> _links = new List<IDisposable>();
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-            var selection = (string)e.AddedItems.Single();
+            var selection = (string) e.AddedItems.Single();
             if (_points.ContainsKey(selection)) return;
-            var ((host, topic), helper) =
-                Global.Instance.Helpers.Single(it => $"{it.Key.Item1}: {it.Key.Item2}" == selection);
-            helper.Port
-                  .LinkTo(new ActionBlock<(TopicGraphicHelper.GraphType, List<Vector3>)>(
-                              p => Operate(host, topic, list => {
-                                  var (type, l) = p;
-                                  switch (type) {
-                                      case TopicGraphicHelper.GraphType.OneDimension:
-                                      case TopicGraphicHelper.GraphType.TwoDimension:
-                                      case TopicGraphicHelper.GraphType.Pose:
-                                          list.Add(l[0]);
-                                          break;
-                                      case TopicGraphicHelper.GraphType.Frame:
-                                          list.Clear();
-                                          list.AddRange(l);
-                                          break;
-                                  }
-                              })), new DataflowLinkOptions())
-                  .Also(_links.Add);
+            var (config, port) =
+                Global.Instance.Receiver.Ports.Single(it => it.Key.ToString() == selection);
+            port.LinkTo(new ActionBlock<List<Vector3>>(
+                            frame => {
+                                var list = _points.GetOrAdd(config.ToString(), new List<Vector3>());
+                                lock (list) {
+                                    if (config.Type == GraphType.Frame) list.Clear();
+                                    list.AddRange(frame);
+                                }
+
+                                Canvas2D.Invalidate();
+                            }), new DataflowLinkOptions())
+                .Also(_links.Add);
         }
 
         private void GraphicView_OnUnloaded(object sender, RoutedEventArgs e) {
@@ -93,7 +74,7 @@ namespace MonitorTool.Controls {
         public GraphicView(GraphicViewModel context = null) {
             InitializeComponent();
             ViewModelContext = context?.Also(it => it.Canvas = Canvas2D)
-                            ?? new GraphicViewModel { Canvas = Canvas2D };
+                            ?? new GraphicViewModel {Canvas = Canvas2D};
         }
 
         /// <summary>
@@ -106,11 +87,11 @@ namespace MonitorTool.Controls {
         /// <param name="allowShrink">允许范围缩小</param>
         /// <returns>目标范围</returns>
         private static (Vector2, Vector2) CalculateRange(
-            (Vector2, Vector2) current,
+            (Vector2, Vector2)   current,
             IEnumerable<Vector3> points,
-            bool x,
-            bool y,
-            bool allowShrink
+            bool                 x,
+            bool                 y,
+            bool                 allowShrink
         ) {
             var (min, max) = current;
             var x0 = float.MaxValue;
@@ -124,7 +105,8 @@ namespace MonitorTool.Controls {
                     if (vector2.X < x0) x0 = vector2.X;
                     if (vector2.X > x1) x1 = vector2.X;
                 }
-            } else {
+            }
+            else {
                 x0 = min.X;
                 x1 = max.X;
             }
@@ -134,7 +116,8 @@ namespace MonitorTool.Controls {
                     if (vector2.Y < y0) y0 = vector2.Y;
                     if (vector2.Y > y1) y1 = vector2.Y;
                 }
-            } else {
+            }
+            else {
                 y0 = min.Y;
                 y1 = max.Y;
             }
@@ -148,10 +131,12 @@ namespace MonitorTool.Controls {
                         if (x1 <= max.X) {
                             x0 = min.X;
                             x1 = max.X;
-                        } else {
+                        }
+                        else {
                             x0 = x1 - w;
                         }
-                    } else {
+                    }
+                    else {
                         x1 = x0 + w;
                     }
 
@@ -160,10 +145,12 @@ namespace MonitorTool.Controls {
                         if (y1 <= max.Y) {
                             y0 = min.Y;
                             y1 = max.Y;
-                        } else {
+                        }
+                        else {
                             y0 = y1 - h;
                         }
-                    } else {
+                    }
+                    else {
                         y1 = y0 + h;
                     }
             }
@@ -178,16 +165,17 @@ namespace MonitorTool.Controls {
         /// <param name="b">数字2</param>
         /// <param name="min">较小的</param>
         /// <param name="max">较大的</param>
-        private static void Order(double a,
-                                  double b,
+        private static void Order(double    a,
+                                  double    b,
                                   out float min,
                                   out float max) {
             if (a < b) {
-                min = (float)a;
-                max = (float)b;
-            } else {
-                min = (float)b;
-                max = (float)a;
+                min = (float) a;
+                max = (float) b;
+            }
+            else {
+                min = (float) b;
+                max = (float) a;
             }
         }
 
@@ -213,22 +201,22 @@ namespace MonitorTool.Controls {
             var points = (from entry in _points
                           where visible.Contains(entry.Key)
                           select entry)
-               .SelectNotNull(it => {
-                   var (topic, list) = it;
+                        .SelectNotNull(it => {
+                             var (topic, list) = it;
 
-                   var count = _configs[topic].Count;
-                   if (count > 0)
-                       lock (list)
-                           return Tuple.Create(topic, list.TakeLast(count).ToImmutableList());
+                             var count = _configs[topic].Count;
+                             if (count > 0)
+                                 lock (list)
+                                     return Tuple.Create(topic, list.TakeLast(count).ToImmutableList());
 
-                   if (count < 0) {
-                       list.Clear();
-                       _configs[topic].Count = -count;
-                   }
+                             if (count < 0) {
+                                 list.Clear();
+                                 _configs[topic].Count = -count;
+                             }
 
-                   return null;
-               })
-               .ToImmutableDictionary(it => it.Item1, it => it.Item2);
+                             return null;
+                         })
+                        .ToImmutableDictionary(it => it.Item1, it => it.Item2);
             if (points.None()) return;
 
             // 自动范围
@@ -249,8 +237,8 @@ namespace MonitorTool.Controls {
              allowShrink: true);
 
             // 保存参数
-            var width = (float)sender.ActualWidth;
-            var height = (float)sender.ActualHeight;
+            var width  = (float) sender.ActualWidth;
+            var height = (float) sender.ActualHeight;
             ViewModelContext.BuildTransform(out var transform, out var reverse);
             // 计算范围指定
             switch (_state) {
@@ -258,20 +246,20 @@ namespace MonitorTool.Controls {
                     // 空闲状态
                     break;
                 case RangeState.Normal:
-                    var x = (float)_current.X;
-                    var y = (float)_current.Y;
-                    brush.DrawLine(new Vector2(x, 0), new Vector2(x, height), Colors.White);
-                    brush.DrawLine(new Vector2(0, y), new Vector2(width, y), Colors.White);
-                    brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1), Colors.Black);
+                    var x = (float) _current.X;
+                    var y = (float) _current.Y;
+                    brush.DrawLine(new Vector2(x, 0),     new Vector2(x,     height), Colors.White);
+                    brush.DrawLine(new Vector2(0, y),     new Vector2(width, y),      Colors.White);
+                    brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1),  Colors.Black);
                     brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height),
                                    Colors.Black);
                     var p = reverse(new Vector3(x, y, float.NaN));
                     brush.DrawText($"{p.X}, {p.Y}", x + 1, y - 23, Colors.Black);
-                    brush.DrawText($"{p.X}, {p.Y}", x, y - 24, Colors.White);
+                    brush.DrawText($"{p.X}, {p.Y}", x,     y - 24, Colors.White);
                     break;
                 case RangeState.Reset:
                     // 正在重新划定范围
-                    brush.DrawRoundedRectangle(new Rect(new Point(_origin.X - 1, _origin.Y - 1),
+                    brush.DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
                                                         new Point(_current.X - 1, _current.Y - 1)),
                                                0, 0, Colors.White);
                     brush.DrawRoundedRectangle(new Rect(_origin, _current),
@@ -279,7 +267,7 @@ namespace MonitorTool.Controls {
                     break;
                 case RangeState.Done:
                     // 确定范围
-                    _state = RangeState.Normal;
+                    _state                 = RangeState.Normal;
                     ViewModelContext.AutoX = ViewModelContext.AutoY = false;
                     Order(_origin.X, _current.X, out var x0, out var x1);
                     Order(_origin.Y, _current.Y, out var y0, out var y1);
@@ -295,12 +283,12 @@ namespace MonitorTool.Controls {
             {
                 // 计算实际范围显示
                 var tp0 = reverse(new Vector3(0, height, float.NaN));
-                X0Text.Text = ((int)tp0.X).ToString(CultureInfo.CurrentCulture);
-                Y0Text.Text = ((int)tp0.Y).ToString(CultureInfo.CurrentCulture);
+                X0Text.Text = ((int) tp0.X).ToString(CultureInfo.CurrentCulture);
+                Y0Text.Text = ((int) tp0.Y).ToString(CultureInfo.CurrentCulture);
 
                 var tp1 = reverse(new Vector3(width, 0, float.NaN));
-                X1Text.Text = ((int)tp1.X).ToString(CultureInfo.CurrentCulture);
-                Y1Text.Text = ((int)tp1.Y).ToString(CultureInfo.CurrentCulture);
+                X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
+                Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
             }
 
             // 画一个位姿
@@ -310,14 +298,14 @@ namespace MonitorTool.Controls {
                 brush.FillCircle(p, 2, color);
                 if (!float.IsNaN(point.Z))
                     brush.DrawLine(p, p + 20 * new Vector2(MathF.Cos(d), MathF.Sin(d)), color, 1);
-            } 
+            }
 
             // 画点
             foreach (var (name, list) in points) {
-                Vector3 onCanvas;
-                Vector3? last = null;
-                var config = _configs[name];
-                var color = config.Color;
+                Vector3  onCanvas;
+                Vector3? last   = null;
+                var      config = _configs[name];
+                var      color  = config.Color;
                 foreach (var p in list.SkipLast(1).ToArray()) {
                     onCanvas = transform(p);
                     DrawPose(onCanvas, color);
