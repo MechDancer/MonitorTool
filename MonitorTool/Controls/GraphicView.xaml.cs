@@ -207,7 +207,10 @@ namespace MonitorTool.Controls {
                              var count = _configs[topic].Count;
                              if (count > 0)
                                  lock (list)
-                                     return Tuple.Create(topic, list.TakeLast(count).ToImmutableList());
+                                     return list.TakeLast(count)
+                                                .ToImmutableList()
+                                                .TakeUnless(x => x.IsEmpty)
+                                               ?.Let(x => Tuple.Create(topic, x));
 
                              if (count < 0) {
                                  list.Clear();

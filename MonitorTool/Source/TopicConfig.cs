@@ -12,6 +12,18 @@ namespace MonitorTool.Source {
     }
 
     /// <summary>
+    /// 单帧数据类型
+    /// </summary>
+    public enum FrameType : byte {
+        OneFloat    = 0,
+        OneDouble   = 1,
+        TwoFloat    = 2,
+        TwoDouble   = 3,
+        ThreeFloat  = 4,
+        ThreeDouble = 5
+    }
+
+    /// <summary>
     /// 图形配置
     /// </summary>
     public struct TopicConfig {
