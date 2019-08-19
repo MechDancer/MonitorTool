@@ -286,12 +286,12 @@ namespace MonitorTool.Controls {
             {
                 // 计算实际范围显示
                 var tp0 = reverse(new Vector3(0, height, float.NaN));
-                X0Text.Text = ((int) tp0.X).ToString(CultureInfo.CurrentCulture);
-                Y0Text.Text = ((int) tp0.Y).ToString(CultureInfo.CurrentCulture);
+                X0Text.Text = ((long) tp0.X).ToString(CultureInfo.CurrentCulture);
+                Y0Text.Text = ((long) tp0.Y).ToString(CultureInfo.CurrentCulture);
 
                 var tp1 = reverse(new Vector3(width, 0, float.NaN));
-                X1Text.Text = ((int) tp1.X).ToString(CultureInfo.CurrentCulture);
-                Y1Text.Text = ((int) tp1.Y).ToString(CultureInfo.CurrentCulture);
+                X1Text.Text = ((long) tp1.X).ToString(CultureInfo.CurrentCulture);
+                Y1Text.Text = ((long) tp1.Y).ToString(CultureInfo.CurrentCulture);
             }
 
             // 画一个位姿
