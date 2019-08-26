@@ -25,7 +25,7 @@ namespace MonitorTool.Source {
     /// </summary>
     public class TopicReceiver : UniqueComponent<TopicReceiver>,
                                  IMulticastListener {
-        private static readonly byte[] InterestSet = {(byte) UdpCmd.TopicMessage};
+        private static readonly byte[] InterestSet = {6};
         private static readonly DateTime Origin = DateTime.Now.Date;
 
         public IReadOnlyCollection<byte> Interest => InterestSet;
@@ -98,14 +98,14 @@ namespace MonitorTool.Source {
                                   case FrameType.OneFloat:
                                       length /= sizeof(float);
                                       while (length-- > 0)
-                                          frame.Add(new Vector3((float) (DateTime.Now.Ticks / 1E7),
+                                          frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
                                                                 data.ReadFloat(),
                                                                 float.NaN));
                                       break;
                                   case FrameType.OneDouble:
                                       length /= sizeof(double);
                                       while (length-- > 0)
-                                          frame.Add(new Vector3((float) (DateTime.Now.Ticks / 1E7),
+                                          frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
                                                                 (float) data.ReadDouble(),
                                                                 float.NaN));
                                       break;
