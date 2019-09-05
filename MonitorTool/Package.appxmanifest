@@ -3,7 +3,7 @@
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
          xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          IgnorableNamespaces="uap mp">
-    <Identity Name="0ab3165f-36e3-45b3-b3c2-c5eb61e8ca91" Publisher="CN=ydrml" Version="1.0.1.0"/>
+    <Identity Name="0ab3165f-36e3-45b3-b3c2-c5eb61e8ca91" Publisher="CN=YangDR, O=MechDancer, C=China" Version="1.0.0.0"/>
     <mp:PhoneIdentity PhoneProductId="0ab3165f-36e3-45b3-b3c2-c5eb61e8ca91"
                       PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
     <Properties>

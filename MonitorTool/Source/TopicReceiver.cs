@@ -43,111 +43,111 @@ namespace MonitorTool.Source {
             Ports.GetOrAdd(new TopicConfig(sender, topic, type),
                            new Port(null))
                 ?.Also(port => {
-                      var rest  = stream.Length - stream.Position;
-                      var data  = new NetworkDataReader(stream);
-                      var frame = new List<Vector3>();
-                      switch (type) {
-                          case GraphType.OneDimension:
-                              switch (rest) {
-                                  case sizeof(float):
-                                      frame.Add(new Vector3((float) ((DateTime.Now - Origin).Ticks / 1E7),
-                                                            data.ReadFloat(),
-                                                            float.NaN));
-                                      break;
-                                  case sizeof(double):
-                                      frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
-                                                            (float) data.ReadDouble(),
-                                                            float.NaN));
-                                      break;
-                              }
+                    var rest = stream.Length - stream.Position;
+                    var data = new NetworkDataReader(stream);
+                    var frame = new List<Vector3>();
+                    switch (type) {
+                        case GraphType.OneDimension:
+                            switch (rest) {
+                                case sizeof(float):
+                                    frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
+                                                          data.ReadFloat(),
+                                                          float.NaN));
+                                    break;
+                                case sizeof(double):
+                                    frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
+                                                          (float)data.ReadDouble(),
+                                                          float.NaN));
+                                    break;
+                            }
 
-                              break;
-                          case GraphType.TwoDimension:
-                              switch (rest) {
-                                  case 2 * sizeof(float):
-                                      frame.Add(new Vector3(data.ReadFloat(),
-                                                            data.ReadFloat(),
-                                                            float.NaN));
-                                      break;
-                                  case 2 * sizeof(double):
-                                      frame.Add(new Vector3((float) data.ReadDouble(),
-                                                            (float) data.ReadDouble(),
-                                                            float.NaN));
-                                      break;
-                              }
+                            break;
+                        case GraphType.TwoDimension:
+                            switch (rest) {
+                                case 2 * sizeof(float):
+                                    frame.Add(new Vector3(data.ReadFloat(),
+                                                          data.ReadFloat(),
+                                                          float.NaN));
+                                    break;
+                                case 2 * sizeof(double):
+                                    frame.Add(new Vector3((float)data.ReadDouble(),
+                                                          (float)data.ReadDouble(),
+                                                          float.NaN));
+                                    break;
+                            }
 
-                              break;
-                          case GraphType.Pose:
-                              switch (rest) {
-                                  case 3 * sizeof(float):
-                                      frame.Add(new Vector3(data.ReadFloat(),
-                                                            data.ReadFloat(),
-                                                            data.ReadFloat()));
-                                      break;
-                                  case 3 * sizeof(double):
-                                      frame.Add(new Vector3((float) data.ReadDouble(),
-                                                            (float) data.ReadDouble(),
-                                                            (float) data.ReadDouble()));
-                                      break;
-                              }
+                            break;
+                        case GraphType.Pose:
+                            switch (rest) {
+                                case 3 * sizeof(float):
+                                    frame.Add(new Vector3(data.ReadFloat(),
+                                                          data.ReadFloat(),
+                                                          data.ReadFloat()));
+                                    break;
+                                case 3 * sizeof(double):
+                                    frame.Add(new Vector3((float)data.ReadDouble(),
+                                                          (float)data.ReadDouble(),
+                                                          (float)data.ReadDouble()));
+                                    break;
+                            }
 
-                              break;
-                          case GraphType.Frame:
-                              var length = rest - 1;
-                              switch ((FrameType) stream.ReadByte()) {
-                                  case FrameType.OneFloat:
-                                      length /= sizeof(float);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
-                                                                data.ReadFloat(),
-                                                                float.NaN));
-                                      break;
-                                  case FrameType.OneDouble:
-                                      length /= sizeof(double);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
-                                                                (float) data.ReadDouble(),
-                                                                float.NaN));
-                                      break;
-                                  case FrameType.TwoFloat:
-                                      length /= 2 * sizeof(float);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3(data.ReadFloat(),
-                                                                data.ReadFloat(),
-                                                                float.NaN));
-                                      break;
-                                  case FrameType.TwoDouble:
-                                      length /= 2 * sizeof(double);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3((float) data.ReadDouble(),
-                                                                (float) data.ReadDouble(),
-                                                                float.NaN));
-                                      break;
-                                  case FrameType.ThreeFloat:
-                                      length /= 3 * sizeof(float);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3(data.ReadFloat(),
-                                                                data.ReadFloat(),
-                                                                data.ReadFloat()));
-                                      break;
-                                  case FrameType.ThreeDouble:
-                                      length /= 3 * sizeof(double);
-                                      while (length-- > 0)
-                                          frame.Add(new Vector3((float) data.ReadDouble(),
-                                                                (float) data.ReadDouble(),
-                                                                (float) data.ReadDouble()));
-                                      break;
-                                  default:
-                                      throw new ArgumentOutOfRangeException();
-                              }
+                            break;
+                        case GraphType.Frame:
+                            var length = rest - 1;
+                            switch ((FrameType)stream.ReadByte()) {
+                                case FrameType.OneFloat:
+                                    length /= sizeof(float);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
+                                                              data.ReadFloat(),
+                                                              float.NaN));
+                                    break;
+                                case FrameType.OneDouble:
+                                    length /= sizeof(double);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3((float)((DateTime.Now - Origin).Ticks / 1E7),
+                                                              (float)data.ReadDouble(),
+                                                              float.NaN));
+                                    break;
+                                case FrameType.TwoFloat:
+                                    length /= 2 * sizeof(float);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3(data.ReadFloat(),
+                                                              data.ReadFloat(),
+                                                              float.NaN));
+                                    break;
+                                case FrameType.TwoDouble:
+                                    length /= 2 * sizeof(double);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3((float)data.ReadDouble(),
+                                                              (float)data.ReadDouble(),
+                                                              float.NaN));
+                                    break;
+                                case FrameType.ThreeFloat:
+                                    length /= 3 * sizeof(float);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3(data.ReadFloat(),
+                                                              data.ReadFloat(),
+                                                              data.ReadFloat()));
+                                    break;
+                                case FrameType.ThreeDouble:
+                                    length /= 3 * sizeof(double);
+                                    while (length-- > 0)
+                                        frame.Add(new Vector3((float)data.ReadDouble(),
+                                                              (float)data.ReadDouble(),
+                                                              (float)data.ReadDouble()));
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
 
-                              break;
-                          default:
-                              throw new ArgumentOutOfRangeException();
-                      }
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
-                      if (frame.Any()) port.Post(frame);
-                  });
+                    if (type == GraphType.Frame || frame.Any()) port.Post(frame);
+                });
         }
     }
 }
