@@ -48,14 +48,30 @@ namespace MonitorTool.Controls {
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
             var selection = (string) e.AddedItems.Single();
             if (_points.ContainsKey(selection)) return;
-            var (config, port) =
+            var (info, port) =
                 Global.Instance.Receiver.Ports.Single(it => it.Key.ToString() == selection);
             port.LinkTo(new ActionBlock<List<Vector3>>(
                             frame => {
-                                var list = _points.GetOrAdd(config.ToString(), new List<Vector3>());
+                                var topic = info.ToString();
+                                var list  = _points.GetOrAdd(topic, _ => new List<Vector3>());
+                                var config = _configs.GetOrAdd(topic,
+                                    _ => {
+                                        var it = new GraphicConfig(topic);
+                                        it.PropertyChanged += (__, ___) => Canvas2D.Invalidate();
+                                        MainList.Dispatcher.RunAsync(
+                                            Windows.UI.Core.CoreDispatcherPriority.Normal,
+                                            () => {
+                                                MainList.Items?.Add(it);
+                                                MainList.SelectedItems.Add(it);
+                                            });
+                                        return it;
+                                    });
                                 lock (list) {
-                                    if (config.Type == GraphType.Frame) list.Clear();
+                                    if (info.Type == GraphType.Frame) list.Clear();
                                     list.AddRange(frame);
+
+                                    var verbose = list.Count - _configs[topic].SaveCount;
+                                    if (verbose > 0) list.RemoveRange(0, verbose);
                                 }
 
                                 Canvas2D.Invalidate();
@@ -105,8 +121,7 @@ namespace MonitorTool.Controls {
                     if (vector2.X < x0) x0 = vector2.X;
                     if (vector2.X > x1) x1 = vector2.X;
                 }
-            }
-            else {
+            } else {
                 x0 = min.X;
                 x1 = max.X;
             }
@@ -116,8 +131,7 @@ namespace MonitorTool.Controls {
                     if (vector2.Y < y0) y0 = vector2.Y;
                     if (vector2.Y > y1) y1 = vector2.Y;
                 }
-            }
-            else {
+            } else {
                 y0 = min.Y;
                 y1 = max.Y;
             }
@@ -131,12 +145,10 @@ namespace MonitorTool.Controls {
                         if (x1 <= max.X) {
                             x0 = min.X;
                             x1 = max.X;
-                        }
-                        else {
+                        } else {
                             x0 = x1 - w;
                         }
-                    }
-                    else {
+                    } else {
                         x1 = x0 + w;
                     }
 
@@ -145,12 +157,10 @@ namespace MonitorTool.Controls {
                         if (y1 <= max.Y) {
                             y0 = min.Y;
                             y1 = max.Y;
-                        }
-                        else {
+                        } else {
                             y0 = y1 - h;
                         }
-                    }
-                    else {
+                    } else {
                         y1 = y0 + h;
                     }
             }
@@ -172,8 +182,7 @@ namespace MonitorTool.Controls {
             if (a < b) {
                 min = (float) a;
                 max = (float) b;
-            }
-            else {
+            } else {
                 min = (float) b;
                 max = (float) a;
             }
@@ -182,15 +191,6 @@ namespace MonitorTool.Controls {
         private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
             // 保存画笔
             var brush = args.DrawingSession;
-
-            // 新图像添加配置
-            foreach (var topic in _points.Keys) {
-                var config = new GraphicConfig(topic);
-                if (!_configs.TryAdd(topic, config)) continue;
-                config.PropertyChanged += (_, __) => Canvas2D.Invalidate();
-                MainList.Items?.Add(config);
-                MainList.SelectedItems.Add(config);
-            }
 
             // 排除不画的
             var visible = MainList
@@ -202,23 +202,15 @@ namespace MonitorTool.Controls {
                           where visible.Contains(entry.Key)
                           select entry)
                         .SelectNotNull(it => {
-                             var (topic, list) = it;
-
-                             var count = _configs[topic].Count;
-                             if (count > 0)
-                                 lock (list)
-                                     return list.TakeLast(count)
-                                                .ToImmutableList()
-                                                .TakeUnless(x => x.IsEmpty)
-                                               ?.Let(x => Tuple.Create(topic, x));
-
-                             if (count < 0) {
-                                 list.Clear();
-                                 _configs[topic].Count = -count;
-                             }
-
-                             return null;
-                         })
+                                           var (topic, list) = it;
+                                           var count = _configs[topic].ShowCount;
+                                           if (count <= 0) return null;
+                                           lock (list)
+                                               return list.TakeLast(count)
+                                                          .ToImmutableList()
+                                                          .TakeUnless(x => x.IsEmpty)
+                                                         ?.Let(x => Tuple.Create(topic, x));
+                                       })
                         .ToImmutableDictionary(it => it.Item1, it => it.Item2);
             if (points.None()) return;
 
@@ -375,11 +367,6 @@ namespace MonitorTool.Controls {
                                       Transform(new Vector2(w, 0)));
 
             Canvas2D.Invalidate();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e) {
-            var config = (e.OriginalSource as Control)?.DataContext as GraphicConfig;
-            config.Count *= -1;
         }
 
         private enum RangeState : byte {

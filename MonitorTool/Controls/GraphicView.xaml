@@ -21,21 +21,37 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="显示点数" VerticalAlignment="Center" />
-                                <TextBox Text="{x:Bind CountText, Mode=TwoWay}"
-                                         Grid.Row="0" Grid.Column="1" Margin="4,0,0,4" />
-                                <Button Content="清除"
-                                        Click="Button_Click"
-                                        Grid.Row="0" Grid.Column="2"/>
+                                <TextBlock Text="显示点数" VerticalAlignment="Center"
+                                           Grid.Row="0" Grid.Column="0"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBox.Text>
+                                        <Binding Path="ShowCount" Mode="TwoWay">
+                                            <Binding.Converter>
+                                                <local:IntFormatter/>
+                                            </Binding.Converter>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Text="保存点数" VerticalAlignment="Center" 
+                                           Grid.Row="1" Grid.Column="0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Margin="4,0,0,4">
+                                    <TextBox.Text>
+                                        <Binding Path="SaveCount" Mode="TwoWay">
+                                            <Binding.Converter>
+                                                <local:IntFormatter/>
+                                            </Binding.Converter>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
                                 <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
-                                             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                              IsAlphaEnabled="True"
                                              IsAlphaTextInputVisible="False"
                                              IsColorPreviewVisible="False"

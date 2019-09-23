@@ -23,7 +23,7 @@
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>4FA1FD8743F9431A8CD76807C2664A3152E07DD8</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>6B5D689C701E9A00A23F7FE42C6CDFFBB5097358</PackageCertificateThumbprint>
     <AppInstallerUri>\\localhost</AppInstallerUri>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
@@ -139,6 +139,7 @@
     <Compile Include="Controls\GroupSelector.xaml.cs">
       <DependentUpon>GroupSelector.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\IntFormatter.cs" />
     <Compile Include="Controls\ProbeView.xaml.cs">
       <DependentUpon>ProbeView.xaml</DependentUpon>
     </Compile>
