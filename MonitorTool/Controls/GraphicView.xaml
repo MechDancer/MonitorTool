@@ -154,8 +154,8 @@
                             HorizontalAlignment="Stretch" Height="32"
                             Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
                 <DropDownButton.Flyout>
-                    <Flyout>
-                        <ListView ItemsSource="{x:Bind Topics}" SelectionChanged="Selector_OnSelectionChanged" />
+                    <Flyout Opening="Flyout_Opening">
+                        <ListView x:Name="TopicList" SelectionChanged="Selector_OnSelectionChanged" />
                     </Flyout>
                 </DropDownButton.Flyout>
             </DropDownButton>

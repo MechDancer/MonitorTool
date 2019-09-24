@@ -9,6 +9,7 @@ using Windows.UI.Xaml.Navigation;
 using MechDancer.Common;
 using MonitorTool.Controls;
 using static Windows.UI.Core.CoreDispatcherPriority;
+using MonitorTool.Source;
 
 namespace MonitorTool.Pages {
 	public sealed partial class ProbePage {
@@ -21,6 +22,7 @@ namespace MonitorTool.Pages {
 		public ProbePage() => InitializeComponent();
 
 		protected override async void OnNavigatedTo(NavigationEventArgs e) {
+            Memory.Add(Global.Instance.Group);
 			await View.Dispatcher.RunAsync
 				(Low, async () => {
 					foreach (var group in Memory) Add(group);

@@ -25,15 +25,15 @@ namespace MonitorTool.Controls {
 
         public readonly GraphicViewModel ViewModelContext;
 
-        private IEnumerable<string> Topics
-            => Global
-              .Instance
-              .Receiver
-              .Ports
-              .Keys
-              .Select(it => it.ToString())
-              .WhereNot(it => _points.ContainsKey(it))
-              .ToList();
+        private void Flyout_Opening(object sender, object e) {
+            TopicList.Items.Clear();
+            foreach (var topic in from topic in
+                                     from item in Global.Instance.Receiver.Ports.Keys
+                                     select item.ToString()
+                                 where !_points.Keys.Contains(topic)
+                                 select topic)
+                TopicList.Items.Add(topic);
+        }
 
         #region Private
 
@@ -46,26 +46,25 @@ namespace MonitorTool.Controls {
         private readonly List<IDisposable> _links = new List<IDisposable>();
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-            var selection = (string) e.AddedItems.Single();
-            if (_points.ContainsKey(selection)) return;
+            var selection = (string) e.AddedItems.SingleOrDefault();
+            if (selection == null || _points.ContainsKey(selection)) return;
             var (info, port) =
                 Global.Instance.Receiver.Ports.Single(it => it.Key.ToString() == selection);
             port.LinkTo(new ActionBlock<List<Vector3>>(
                             frame => {
                                 var topic = info.ToString();
                                 var list  = _points.GetOrAdd(topic, _ => new List<Vector3>());
-                                var config = _configs.GetOrAdd(topic,
-                                    _ => {
-                                        var it = new GraphicConfig(topic);
-                                        it.PropertyChanged += (__, ___) => Canvas2D.Invalidate();
-                                        MainList.Dispatcher.RunAsync(
-                                            Windows.UI.Core.CoreDispatcherPriority.Normal,
-                                            () => {
-                                                MainList.Items?.Add(it);
-                                                MainList.SelectedItems.Add(it);
-                                            });
-                                        return it;
-                                    });
+                                var config = _configs.GetOrAdd(topic, _ => {
+                                    var it = new GraphicConfig(topic);
+                                    it.PropertyChanged += (__, ___) => Canvas2D.Invalidate();
+                                    var ____ = MainList.Dispatcher.RunAsync(
+                                        Windows.UI.Core.CoreDispatcherPriority.Normal,
+                                        () => {
+                                            MainList.Items?.Add(it);
+                                            MainList.SelectedItems.Add(it);
+                                        });
+                                    return it;
+                                });
                                 lock (list) {
                                     if (info.Type == GraphType.Frame) list.Clear();
                                     list.AddRange(frame);
