@@ -13,22 +13,22 @@ namespace MonitorTool.Pages {
 
 		public GraphicPage() => InitializeComponent();
 
-		protected override void OnNavigatedTo(NavigationEventArgs e) {
-			Debug.Assert(GridView.Items != null, "GridView.Items != null");
-			Debug.Assert(Pivot.Items    != null, "Pivot.Items != null");
-
-			foreach (var (topic, viewModel) in Memory) {
-				var graphic = new GraphicView(viewModel);
-				Pivot.Items.Add(new PivotItem {Header = topic, Content = graphic});
-				GridView.Items.Insert(GridView.Items.Count - 1,
-									  new GridViewItem {
-										  Height  = 200,
-										  Width   = 200,
-										  Tag     = topic,
-										  Content = new TextBlock {Text = topic, FontSize = 36}
-									  });
-			}
-		}
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            Debug.Assert(GridView.Items != null, "GridView.Items != null");
+            Debug.Assert(Pivot.Items != null, "Pivot.Items != null");
+            Memory["默认"] = new GraphicViewModel();
+            foreach (var (topic, viewModel) in Memory) {
+                var graphic = new GraphicView(viewModel);
+                Pivot.Items.Add(new PivotItem { Header = topic, Content = graphic });
+                GridView.Items.Insert(GridView.Items.Count - 1,
+                                      new GridViewItem {
+                                          Height  = 200,
+                                          Width   = 200,
+                                          Tag     = topic,
+                                          Content = new TextBlock { Text = topic, FontSize = 36 }
+                                      });
+            }
+        }
 
 		private bool TopicSelector_OnButtonClick(string topic) {
 			Debug.Assert(GridView.Items != null, "GridView.Items != null");

@@ -112,6 +112,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -125,19 +126,22 @@
             <CheckBox Content="保持比例" MinWidth="0"
                       Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                       IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
+            <CheckBox Content="发送信号" MinWidth="0"
+                      Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                      IsChecked="{x:Bind ViewModelContext.Command, Mode=TwoWay}" />
             <ToggleButton Content="自动移动" IsChecked="{x:Bind ViewModelContext.AutoMove, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="0,4"
-                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
+                          Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" />
             <ToggleButton Content="自动X范围" IsChecked="{x:Bind ViewModelContext.AutoX, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="0,4,2,4"
-                          Grid.Row="3" Grid.Column="0" />
+                          Grid.Row="4" Grid.Column="0" />
             <ToggleButton Content="自动Y范围" IsChecked="{x:Bind ViewModelContext.AutoY, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="2,4,0,4"
-                          Grid.Row="3" Grid.Column="1" />
+                          Grid.Row="4" Grid.Column="1" />
             <Button Content="背景颜色"
                     Background="{x:Bind ViewModelContext.BackgroundBrush, Mode=OneWay}"
                     HorizontalAlignment="Stretch" Margin="2,4,0,4"
-                    Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                    Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button.Flyout>
                     <Flyout>
                         <ColorPicker Color="{x:Bind ViewModelContext.Background, Mode=TwoWay}"
@@ -149,10 +153,10 @@
                       ItemTemplate="{StaticResource GraphConfigTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple"
-                      Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+                      Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" />
             <DropDownButton Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
                             HorizontalAlignment="Stretch" Height="32"
-                            Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+                            Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
                 <DropDownButton.Flyout>
                     <Flyout Opening="Flyout_Opening">
                         <ListView x:Name="TopicList" SelectionChanged="Selector_OnSelectionChanged" />

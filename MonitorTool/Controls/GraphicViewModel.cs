@@ -15,6 +15,7 @@ namespace MonitorTool.Controls {
         private Color _background = Colors.Transparent;
         private bool  _connection;
         private bool  _proportional;
+        private bool  _command;
 
         private float _x0, _x1, _y0, _y1;
 
@@ -70,6 +71,13 @@ namespace MonitorTool.Controls {
             get => _proportional;
             set {
                 if (SetProperty(ref _proportional, value)) Canvas.Invalidate();
+            }
+        }
+
+        public bool Command {
+            get => _command;
+            set {
+                if (SetProperty(ref _command, value)) Canvas.Invalidate();
             }
         }
 

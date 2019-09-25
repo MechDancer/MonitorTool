@@ -191,7 +191,17 @@ namespace MonitorTool.Controls {
         private void CanvasControl_OnDraw(CanvasControl sender, CanvasDrawEventArgs args) {
             // 保存画笔
             var brush = args.DrawingSession;
-
+            // 绘制标线
+            var height = (float) sender.ActualHeight;
+            var width  = (float) sender.ActualWidth;
+            if (ViewModelContext.Command) {
+                var x = width / 2;
+                var y = height / 2;
+                brush.DrawLine(new Vector2(x, 0), new Vector2(x, height), Colors.White);
+                brush.DrawLine(new Vector2(0, y), new Vector2(width, y), Colors.White);
+                brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1), Colors.Black);
+                brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height), Colors.Black);
+            }
             // 排除不画的
             var visible = MainList
                          .SelectedItems
@@ -213,7 +223,6 @@ namespace MonitorTool.Controls {
                                        })
                         .ToImmutableDictionary(it => it.Item1, it => it.Item2);
             if (points.None()) return;
-
             // 自动范围
             var range =
                 ViewModelContext.AutoMove
@@ -230,10 +239,7 @@ namespace MonitorTool.Controls {
              x: ViewModelContext.AutoX,
              y: ViewModelContext.AutoY,
              allowShrink: true);
-
             // 保存参数
-            var width  = (float) sender.ActualWidth;
-            var height = (float) sender.ActualHeight;
             ViewModelContext.BuildTransform(out var transform, out var reverse);
             // 计算范围指定
             switch (_state) {
@@ -246,8 +252,7 @@ namespace MonitorTool.Controls {
                     brush.DrawLine(new Vector2(x, 0),     new Vector2(x,     height), Colors.White);
                     brush.DrawLine(new Vector2(0, y),     new Vector2(width, y),      Colors.White);
                     brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1),  Colors.Black);
-                    brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height),
-                                   Colors.Black);
+                    brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height), Colors.Black);
                     var p = reverse(new Vector3(x, y, float.NaN));
                     brush.DrawText($"{p.X}, {p.Y}", x + 1, y - 23, Colors.Black);
                     brush.DrawText($"{p.X}, {p.Y}", x,     y - 24, Colors.White);
@@ -332,13 +337,14 @@ namespace MonitorTool.Controls {
         private void Canvas2D_OnPointerMoved(object sender, PointerRoutedEventArgs e) {
             _current = e.GetCurrentPoint(Canvas2D).Position;
             if (_state == RangeState.Reset) Canvas2D.Invalidate();
+            if (!ViewModelContext.Command) return;
             var total = Canvas2D.ActualSize;
             var stream = new MemoryStream(2 * sizeof(double));
             using (var writer = new NetworkDataWriter(stream)) {
                 writer.Write(2 * _current.X / total.X - 1);
                 writer.Write(1 - 2 * _current.Y / total.Y);
-                Global.Instance.Broadcast(stream.GetBuffer());
             }
+            Global.Instance.Broadcast(stream.GetBuffer());
         }
 
         private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e) => _state = RangeState.Normal;
@@ -347,12 +353,13 @@ namespace MonitorTool.Controls {
 
         private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e) {
             _state = RangeState.Idle;
+            if (!ViewModelContext.Command) return;
             var stream = new MemoryStream(2 * sizeof(double));
             using (var writer = new NetworkDataWriter(stream)) {
                 writer.Write(.0);
                 writer.Write(.0);
-                Global.Instance.Broadcast(stream.GetBuffer());
             }
+            Global.Instance.Broadcast(stream.GetBuffer());
         }
 
         private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
