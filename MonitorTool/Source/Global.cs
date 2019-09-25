@@ -4,6 +4,7 @@ using System.Threading;
 using Windows.Foundation.Collections;
 using Windows.Storage;
 using MechDancer.Framework.Net.Presets;
+using MechDancer.Framework.Net.Resources;
 
 namespace MonitorTool.Source {
     /// <summary>
@@ -59,6 +60,9 @@ namespace MonitorTool.Source {
             Group = group;
             return Equals(_remoteHub?.Group, group);
         }
+
+        public void Broadcast(byte[] payload) =>
+            _remoteHub.Broadcast((byte) UdpCmd.Common, payload);
 
         private static bool Check(IPEndPoint group) {
             var ip = group.Address.GetAddressBytes();

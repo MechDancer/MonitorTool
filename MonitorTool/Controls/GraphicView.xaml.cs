@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Input;
 using MechDancer.Common;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using MonitorTool.Source;
+using System.IO;
 
 namespace MonitorTool.Controls {
     public sealed partial class GraphicView {
@@ -331,6 +332,13 @@ namespace MonitorTool.Controls {
         private void Canvas2D_OnPointerMoved(object sender, PointerRoutedEventArgs e) {
             _current = e.GetCurrentPoint(Canvas2D).Position;
             if (_state == RangeState.Reset) Canvas2D.Invalidate();
+            var total = Canvas2D.ActualSize;
+            var stream = new MemoryStream(2 * sizeof(double));
+            using (var writer = new NetworkDataWriter(stream)) {
+                writer.Write(2 * _current.X / total.X - 1);
+                writer.Write(1 - 2 * _current.Y / total.Y);
+                Global.Instance.Broadcast(stream.GetBuffer());
+            }
         }
 
         private void Canvas2D_OnPointerCanceled(object sender, PointerRoutedEventArgs e) => _state = RangeState.Normal;
