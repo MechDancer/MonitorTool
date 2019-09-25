@@ -345,7 +345,15 @@ namespace MonitorTool.Controls {
 
         private void Canvas2D_OnPointerEntered(object sender, PointerRoutedEventArgs e) => _state = RangeState.Normal;
 
-        private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e) => _state = RangeState.Idle;
+        private void Canvas2D_OnPointerExited(object sender, PointerRoutedEventArgs e) {
+            _state = RangeState.Idle;
+            var stream = new MemoryStream(2 * sizeof(double));
+            using (var writer = new NetworkDataWriter(stream)) {
+                writer.Write(.0);
+                writer.Write(.0);
+                Global.Instance.Broadcast(stream.GetBuffer());
+            }
+        }
 
         private void Canvas2D_OnPointerReleased(object sender, PointerRoutedEventArgs e) {
             _state = DateTime.Now - _pressTime < TimeSpan.FromSeconds(0.2)
