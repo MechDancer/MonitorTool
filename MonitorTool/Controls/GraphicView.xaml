@@ -26,11 +26,16 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
+                                <ToggleSwitch IsOn="{x:Bind Background,Mode=TwoWay}" MinWidth="0" Width="84"
+                                              Header="背景模式"
+                                              HorizontalAlignment="Center"
+                                              Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
                                 <TextBlock Text="显示点数" VerticalAlignment="Center"
-                                           Grid.Row="0" Grid.Column="0"/>
-                                <TextBox Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
+                                           Grid.Row="0" Grid.Column="1"/>
+                                <TextBox Grid.Row="0" Grid.Column="2" Margin="4,0,0,4">
                                     <TextBox.Text>
                                         <Binding Path="ShowCount" Mode="TwoWay">
                                             <Binding.Converter>
@@ -40,8 +45,8 @@
                                     </TextBox.Text>
                                 </TextBox>
                                 <TextBlock Text="保存点数" VerticalAlignment="Center" 
-                                           Grid.Row="1" Grid.Column="0"/>
-                                <TextBox Grid.Row="1" Grid.Column="1" Margin="4,0,0,4">
+                                           Grid.Row="1" Grid.Column="1"/>
+                                <TextBox Grid.Row="1" Grid.Column="2" Margin="4,0,0,4">
                                     <TextBox.Text>
                                         <Binding Path="SaveCount" Mode="TwoWay">
                                             <Binding.Converter>
@@ -50,8 +55,8 @@
                                         </Binding>
                                     </TextBox.Text>
                                 </TextBox>
-                                <ColorPicker Color="{x:Bind Color, Mode=TwoWay}"
-                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                <ColorPicker Color="{x:Bind Color,Mode=TwoWay}"
+                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                                              IsAlphaEnabled="True"
                                              IsAlphaTextInputVisible="False"
                                              IsColorPreviewVisible="False"

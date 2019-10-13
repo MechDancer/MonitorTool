@@ -12,7 +12,8 @@ namespace MonitorTool.Controls {
 
         private Color _color      = Functions.RandomColor;
         private int   _showCount  = int.MaxValue;
-        private int   _saveCount  = int.MaxValue;
+        private int   _saveCount  = 1000;
+        private bool  _background = false;
 
         /// <summary>
         /// 构造器
@@ -50,6 +51,14 @@ namespace MonitorTool.Controls {
         public int SaveCount {
             get => _saveCount;
             set => SetProperty(ref _saveCount, value);
+        }
+
+        /// <summary>
+        /// 作为背景
+        /// </summary>
+        public bool Background {
+            get => _background;
+            set => SetProperty(ref _background, value);
         }
     }
 }

@@ -109,17 +109,24 @@ namespace MonitorTool.Controls {
             bool                 y,
             bool                 allowShrink
         ) {
+            var enumerable = points.ToImmutableList();
+            if (points.None()) return current;
+
             var (min, max) = current;
             var x0 = float.MaxValue;
             var x1 = float.MinValue;
             var y0 = float.MaxValue;
             var y1 = float.MinValue;
-
-            var enumerable = points.ToArray();
+            
             if (x) {
                 foreach (var vector2 in enumerable) {
                     if (vector2.X < x0) x0 = vector2.X;
                     if (vector2.X > x1) x1 = vector2.X;
+                }
+                var width = (max.X - min.X) / 2;
+                if (Math.Abs(x1 - x0) < width * 1E-3) {
+                    x0 -= width;
+                    x1 += width;
                 }
             } else {
                 x0 = min.X;
@@ -130,6 +137,11 @@ namespace MonitorTool.Controls {
                 foreach (var vector2 in enumerable) {
                     if (vector2.Y < y0) y0 = vector2.Y;
                     if (vector2.Y > y1) y1 = vector2.Y;
+                }
+                var height = (max.Y - min.Y) / 2;
+                if (Math.Abs(y1 - y0) < height * 1E-3) {
+                    y0 -= height;
+                    y1 += height;
                 }
             } else {
                 y0 = min.Y;
@@ -234,7 +246,9 @@ namespace MonitorTool.Controls {
                      allowShrink: false)
                     : ViewModelContext.Range;
             ViewModelContext.Range = CalculateRange
-            (points: points.Values.Flatten(),
+            (points: (from entry in points
+                      where !_configs[entry.Key].Background
+                      select entry.Value).Flatten(),
              current: range,
              x: ViewModelContext.AutoX,
              y: ViewModelContext.AutoY,
