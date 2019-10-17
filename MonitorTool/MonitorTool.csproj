@@ -23,7 +23,7 @@
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-    <PackageCertificateThumbprint>4FA1FD8743F9431A8CD76807C2664A3152E07DD8</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>F60815485610886A26505B2ACFD960454D2370FC</PackageCertificateThumbprint>
     <AppInstallerUri>\\localhost</AppInstallerUri>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>

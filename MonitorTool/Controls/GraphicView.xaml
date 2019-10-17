@@ -28,6 +28,7 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <ToggleSwitch IsOn="{x:Bind Background,Mode=TwoWay}" MinWidth="0" Width="84"
                                               Header="背景模式"
@@ -35,7 +36,8 @@
                                               Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
                                 <TextBlock Text="显示点数" VerticalAlignment="Center"
                                            Grid.Row="0" Grid.Column="1"/>
-                                <TextBox Grid.Row="0" Grid.Column="2" Margin="4,0,0,4">
+                                <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
+                                         Margin="4,0,0,4">
                                     <TextBox.Text>
                                         <Binding Path="ShowCount" Mode="TwoWay">
                                             <Binding.Converter>
@@ -55,8 +57,12 @@
                                         </Binding>
                                     </TextBox.Text>
                                 </TextBox>
+                                <Button Click="Button_Click" 
+                                        Content="&#xED61;" FontFamily="Segoe MDL2 Assets"
+                                        Grid.Row="1" Grid.Column="3" Margin="4,0,0,4"
+                                        VerticalAlignment="Stretch"/>
                                 <ColorPicker Color="{x:Bind Color,Mode=TwoWay}"
-                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
                                              IsAlphaEnabled="True"
                                              IsAlphaTextInputVisible="False"
                                              IsColorPreviewVisible="False"

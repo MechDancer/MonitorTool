@@ -29,32 +29,32 @@ namespace MonitorTool.Controls {
         private void Flyout_Opening(object sender, object e) {
             TopicList.Items.Clear();
             foreach (var topic in from topic in
-                                     from item in Global.Instance.Receiver.Ports.Keys
-                                     select item.ToString()
-                                 where !_points.Keys.Contains(topic)
-                                 select topic)
+                                      from item in Global.Instance.Receiver.Ports.Keys
+                                      select item.ToString()
+                                  where !_points.Keys.Contains(topic)
+                                  select topic)
                 TopicList.Items.Add(topic);
         }
 
         #region Private
 
         private RangeState _state = RangeState.Idle;
-        private Point      _origin, _current;
-        private DateTime   _pressTime;
+        private Point _origin, _current;
+        private DateTime _pressTime;
 
         #region Links
 
         private readonly List<IDisposable> _links = new List<IDisposable>();
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e) {
-            var selection = (string) e.AddedItems.SingleOrDefault();
+            var selection = (string)e.AddedItems.SingleOrDefault();
             if (selection == null || _points.ContainsKey(selection)) return;
             var (info, port) =
                 Global.Instance.Receiver.Ports.Single(it => it.Key.ToString() == selection);
             port.LinkTo(new ActionBlock<List<Vector3>>(
                             frame => {
                                 var topic = info.ToString();
-                                var list  = _points.GetOrAdd(topic, _ => new List<Vector3>());
+                                var list = _points.GetOrAdd(topic, _ => new List<Vector3>());
                                 var config = _configs.GetOrAdd(topic, _ => {
                                     var it = new GraphicConfig(topic);
                                     it.PropertyChanged += (__, ___) => Canvas2D.Invalidate();
@@ -90,7 +90,7 @@ namespace MonitorTool.Controls {
         public GraphicView(GraphicViewModel context = null) {
             InitializeComponent();
             ViewModelContext = context?.Also(it => it.Canvas = Canvas2D)
-                            ?? new GraphicViewModel {Canvas = Canvas2D};
+                            ?? new GraphicViewModel { Canvas = Canvas2D };
         }
 
         /// <summary>
@@ -103,11 +103,11 @@ namespace MonitorTool.Controls {
         /// <param name="allowShrink">允许范围缩小</param>
         /// <returns>目标范围</returns>
         private static (Vector2, Vector2) CalculateRange(
-            (Vector2, Vector2)   current,
+            (Vector2, Vector2) current,
             IEnumerable<Vector3> points,
-            bool                 x,
-            bool                 y,
-            bool                 allowShrink
+            bool x,
+            bool y,
+            bool allowShrink
         ) {
             var enumerable = points.ToImmutableList();
             if (points.None()) return current;
@@ -117,7 +117,7 @@ namespace MonitorTool.Controls {
             var x1 = float.MinValue;
             var y0 = float.MaxValue;
             var y1 = float.MinValue;
-            
+
             if (x) {
                 foreach (var vector2 in enumerable) {
                     if (vector2.X < x0) x0 = vector2.X;
@@ -187,16 +187,16 @@ namespace MonitorTool.Controls {
         /// <param name="b">数字2</param>
         /// <param name="min">较小的</param>
         /// <param name="max">较大的</param>
-        private static void Order(double    a,
-                                  double    b,
+        private static void Order(double a,
+                                  double b,
                                   out float min,
                                   out float max) {
             if (a < b) {
-                min = (float) a;
-                max = (float) b;
+                min = (float)a;
+                max = (float)b;
             } else {
-                min = (float) b;
-                max = (float) a;
+                min = (float)b;
+                max = (float)a;
             }
         }
 
@@ -204,8 +204,8 @@ namespace MonitorTool.Controls {
             // 保存画笔
             var brush = args.DrawingSession;
             // 绘制标线
-            var height = (float) sender.ActualHeight;
-            var width  = (float) sender.ActualWidth;
+            var height = (float)sender.ActualHeight;
+            var width = (float)sender.ActualWidth;
             if (ViewModelContext.Command) {
                 var x = width / 2;
                 var y = height / 2;
@@ -224,15 +224,15 @@ namespace MonitorTool.Controls {
                           where visible.Contains(entry.Key)
                           select entry)
                         .SelectNotNull(it => {
-                                           var (topic, list) = it;
-                                           var count = _configs[topic].ShowCount;
-                                           if (count <= 0) return null;
-                                           lock (list)
-                                               return list.TakeLast(count)
-                                                          .ToImmutableList()
-                                                          .TakeUnless(x => x.IsEmpty)
-                                                         ?.Let(x => Tuple.Create(topic, x));
-                                       })
+                            var (topic, list) = it;
+                            var count = _configs[topic].ShowCount;
+                            if (count <= 0) return null;
+                            lock (list)
+                                return list.TakeLast(count)
+                                           .ToImmutableList()
+                                           .TakeUnless(x => x.IsEmpty)
+                                          ?.Let(x => Tuple.Create(topic, x));
+                        })
                         .ToImmutableDictionary(it => it.Item1, it => it.Item2);
             if (points.None()) return;
             // 自动范围
@@ -261,19 +261,19 @@ namespace MonitorTool.Controls {
                     // 空闲状态
                     break;
                 case RangeState.Normal:
-                    var x = (float) _current.X;
-                    var y = (float) _current.Y;
-                    brush.DrawLine(new Vector2(x, 0),     new Vector2(x,     height), Colors.White);
-                    brush.DrawLine(new Vector2(0, y),     new Vector2(width, y),      Colors.White);
-                    brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1),  Colors.Black);
+                    var x = (float)_current.X;
+                    var y = (float)_current.Y;
+                    brush.DrawLine(new Vector2(x, 0), new Vector2(x, height), Colors.White);
+                    brush.DrawLine(new Vector2(0, y), new Vector2(width, y), Colors.White);
+                    brush.DrawLine(new Vector2(0, y + 1), new Vector2(width, y + 1), Colors.Black);
                     brush.DrawLine(new Vector2(x + 1, 0), new Vector2(x + 1, height), Colors.Black);
                     var p = reverse(new Vector3(x, y, float.NaN));
                     brush.DrawText($"{p.X}, {p.Y}", x + 1, y - 23, Colors.Black);
-                    brush.DrawText($"{p.X}, {p.Y}", x,     y - 24, Colors.White);
+                    brush.DrawText($"{p.X}, {p.Y}", x, y - 24, Colors.White);
                     break;
                 case RangeState.Reset:
                     // 正在重新划定范围
-                    brush.DrawRoundedRectangle(new Rect(new Point(_origin.X  - 1, _origin.Y  - 1),
+                    brush.DrawRoundedRectangle(new Rect(new Point(_origin.X - 1, _origin.Y - 1),
                                                         new Point(_current.X - 1, _current.Y - 1)),
                                                0, 0, Colors.White);
                     brush.DrawRoundedRectangle(new Rect(_origin, _current),
@@ -281,7 +281,7 @@ namespace MonitorTool.Controls {
                     break;
                 case RangeState.Done:
                     // 确定范围
-                    _state                 = RangeState.Normal;
+                    _state = RangeState.Normal;
                     ViewModelContext.AutoX = ViewModelContext.AutoY = false;
                     Order(_origin.X, _current.X, out var x0, out var x1);
                     Order(_origin.Y, _current.Y, out var y0, out var y1);
@@ -297,12 +297,12 @@ namespace MonitorTool.Controls {
             {
                 // 计算实际范围显示
                 var tp0 = reverse(new Vector3(0, height, float.NaN));
-                X0Text.Text = ((long) tp0.X).ToString(CultureInfo.CurrentCulture);
-                Y0Text.Text = ((long) tp0.Y).ToString(CultureInfo.CurrentCulture);
+                X0Text.Text = ((long)tp0.X).ToString(CultureInfo.CurrentCulture);
+                Y0Text.Text = ((long)tp0.Y).ToString(CultureInfo.CurrentCulture);
 
                 var tp1 = reverse(new Vector3(width, 0, float.NaN));
-                X1Text.Text = ((long) tp1.X).ToString(CultureInfo.CurrentCulture);
-                Y1Text.Text = ((long) tp1.Y).ToString(CultureInfo.CurrentCulture);
+                X1Text.Text = ((long)tp1.X).ToString(CultureInfo.CurrentCulture);
+                Y1Text.Text = ((long)tp1.Y).ToString(CultureInfo.CurrentCulture);
             }
 
             // 画一个位姿
@@ -316,10 +316,10 @@ namespace MonitorTool.Controls {
 
             // 画点
             foreach (var (name, list) in points) {
-                Vector3  onCanvas;
-                Vector3? last   = null;
-                var      config = _configs[name];
-                var      color  = config.Color;
+                Vector3 onCanvas;
+                Vector3? last = null;
+                var config = _configs[name];
+                var color = config.Color;
                 foreach (var p in list.SkipLast(1).ToArray()) {
                     onCanvas = transform(p);
                     DrawPose(onCanvas, color);
@@ -338,13 +338,23 @@ namespace MonitorTool.Controls {
             }
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            if (sender is Button button
+                && button.DataContext is GraphicConfig config
+                && _points.TryGetValue(config.Name, out var list)
+                && list.Any()) {
+                lock (list) { list.Clear(); }
+                Canvas2D.Invalidate();
+            }
+        }
+
         #region Pointer
 
         private void MainList_OnSelectionChanged(object sender, SelectionChangedEventArgs e) => Canvas2D.Invalidate();
 
         private void Canvas2D_OnPointerPressed(object sender, PointerRoutedEventArgs e) {
-            _state     = RangeState.Reset;
-            _origin    = e.GetCurrentPoint(Canvas2D).Position;
+            _state = RangeState.Reset;
+            _origin = e.GetCurrentPoint(Canvas2D).Position;
             _pressTime = DateTime.Now;
         }
 
@@ -384,12 +394,12 @@ namespace MonitorTool.Controls {
         }
 
         private void Canvas2D_OnPointerWheelChanged(object sender, PointerRoutedEventArgs e) {
-            _state                 = RangeState.Normal;
+            _state = RangeState.Normal;
             ViewModelContext.AutoX = ViewModelContext.AutoY = false;
 
             var pointer = e.GetCurrentPoint(Canvas2D);
-            var point   = pointer.Position.Let(it => new Vector2((float) it.X, (float) it.Y));
-            var scale   = pointer.Properties.MouseWheelDelta / 480f;
+            var point = pointer.Position.Let(it => new Vector2((float)it.X, (float)it.Y));
+            var scale = pointer.Properties.MouseWheelDelta / 480f;
 
             ViewModelContext.BuildTransform(out _, out var reverse);
 
@@ -397,8 +407,8 @@ namespace MonitorTool.Controls {
                 => reverse(new Vector3((p - point) * (1 - scale) + point, float.NaN))
                    .Let(it => new Vector2(it.X, it.Y));
 
-            var w = (float) Canvas2D.ActualWidth;
-            var h = (float) Canvas2D.ActualHeight;
+            var w = (float)Canvas2D.ActualWidth;
+            var h = (float)Canvas2D.ActualHeight;
             ViewModelContext.Range = (Transform(new Vector2(0, h)),
                                       Transform(new Vector2(w, 0)));
 
