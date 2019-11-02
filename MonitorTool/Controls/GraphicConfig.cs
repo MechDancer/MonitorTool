@@ -14,6 +14,7 @@ namespace MonitorTool.Controls {
         private int   _showCount  = int.MaxValue;
         private int   _saveCount  = 1000;
         private bool  _background = false;
+        private bool  _connect    = false;
 
         /// <summary>
         /// 构造器
@@ -59,6 +60,14 @@ namespace MonitorTool.Controls {
         public bool Background {
             get => _background;
             set => SetProperty(ref _background, value);
+        }
+
+        /// <summary>
+        /// 连线
+        /// </summary>
+        public bool Connect {
+            get => _connect;
+            set => SetProperty(ref _connect, value);
         }
     }
 }

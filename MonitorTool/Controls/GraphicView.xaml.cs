@@ -56,7 +56,12 @@ namespace MonitorTool.Controls {
                                 var topic = info.ToString();
                                 var list = _points.GetOrAdd(topic, _ => new List<Vector3>());
                                 var config = _configs.GetOrAdd(topic, _ => {
-                                    var it = new GraphicConfig(topic);
+                                    var it = new GraphicConfig(topic) {
+                                        ShowCount = ViewModelContext.DefaultConfig.ShowCount,
+                                        SaveCount = ViewModelContext.DefaultConfig.SaveCount,
+                                        Background = ViewModelContext.DefaultConfig.Background,
+                                        Connect = ViewModelContext.DefaultConfig.Connect
+                                    };
                                     it.PropertyChanged += (__, ___) => Canvas2D.Invalidate();
                                     var ____ = MainList.Dispatcher.RunAsync(
                                         Windows.UI.Core.CoreDispatcherPriority.Normal,
@@ -297,12 +302,12 @@ namespace MonitorTool.Controls {
             {
                 // 计算实际范围显示
                 var tp0 = reverse(new Vector3(0, height, float.NaN));
-                X0Text.Text = ((long)tp0.X).ToString(CultureInfo.CurrentCulture);
-                Y0Text.Text = ((long)tp0.Y).ToString(CultureInfo.CurrentCulture);
+                X0Text.Text = tp0.X.ToString("0.000", CultureInfo.CurrentCulture);
+                Y0Text.Text = tp0.Y.ToString("0.000", CultureInfo.CurrentCulture);
 
                 var tp1 = reverse(new Vector3(width, 0, float.NaN));
-                X1Text.Text = ((long)tp1.X).ToString(CultureInfo.CurrentCulture);
-                Y1Text.Text = ((long)tp1.Y).ToString(CultureInfo.CurrentCulture);
+                X1Text.Text = tp1.X.ToString("0.000", CultureInfo.CurrentCulture);
+                Y1Text.Text = tp1.Y.ToString("0.000", CultureInfo.CurrentCulture);
             }
 
             // 画一个位姿
@@ -320,11 +325,12 @@ namespace MonitorTool.Controls {
                 Vector3? last = null;
                 var config = _configs[name];
                 var color = config.Color;
+                var connect = config.Connect;
                 foreach (var p in list.SkipLast(1).ToArray()) {
                     onCanvas = transform(p);
                     DrawPose(onCanvas, color);
 
-                    if (last != null && ViewModelContext.Connection)
+                    if (last != null && connect)
                         brush.DrawLine(last.Value.Let(it => new Vector2(it.X, it.Y)),
                                        new Vector2(onCanvas.X, onCanvas.Y), color, 1);
                     last = onCanvas;
@@ -332,7 +338,7 @@ namespace MonitorTool.Controls {
 
                 onCanvas = transform(list.Last());
                 DrawPose(onCanvas, color);
-                if (last != null && ViewModelContext.Connection)
+                if (last != null && connect)
                     brush.DrawLine(last.Value.Let(it => new Vector2(it.X, it.Y)),
                                    new Vector2(onCanvas.X, onCanvas.Y), color, 1);
             }

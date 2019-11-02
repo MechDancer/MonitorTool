@@ -13,7 +13,6 @@ namespace MonitorTool.Controls {
                      _autoY = true;
 
         private Color _background = Colors.Transparent;
-        private bool  _connection;
         private bool  _proportional;
         private bool  _command;
 
@@ -21,6 +20,7 @@ namespace MonitorTool.Controls {
 
         public byte          BorderWidth = 10;
         public CanvasControl Canvas;
+        public GraphicConfig DefaultConfig = new GraphicConfig("default");
 
         /// <summary>
         ///     设置最小绘图范围
@@ -57,13 +57,6 @@ namespace MonitorTool.Controls {
             get => _autoMove;
             set {
                 if (SetProperty(ref _autoMove, value)) Canvas.Invalidate();
-            }
-        }
-
-        public bool Connection {
-            get => _connection;
-            set {
-                if (SetProperty(ref _connection, value)) Canvas.Invalidate();
             }
         }
 

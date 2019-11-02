@@ -12,6 +12,7 @@
              Unloaded="GraphicView_OnUnloaded">
 
     <UserControl.Resources>
+        <local:IntFormatter x:Key="IntConverter"/>
         <DataTemplate x:Key="GraphConfigTemplate" x:DataType="local:GraphicConfig">
             <StackPanel Orientation="Horizontal">
                 <Button Background="{x:Bind Brush, Mode=OneWay}"
@@ -20,6 +21,7 @@
                         <Flyout>
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition />
@@ -36,33 +38,22 @@
                                               Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
                                 <TextBlock Text="显示点数" VerticalAlignment="Center"
                                            Grid.Row="0" Grid.Column="1"/>
-                                <TextBox Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
-                                         Margin="4,0,0,4">
-                                    <TextBox.Text>
-                                        <Binding Path="ShowCount" Mode="TwoWay">
-                                            <Binding.Converter>
-                                                <local:IntFormatter/>
-                                            </Binding.Converter>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
+                                <TextBox Text="{x:Bind ShowCount,Mode=TwoWay,Converter={StaticResource IntConverter}}" 
+                                         Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
+                                         Margin="4,0,0,4"/>
                                 <TextBlock Text="保存点数" VerticalAlignment="Center" 
                                            Grid.Row="1" Grid.Column="1"/>
-                                <TextBox Grid.Row="1" Grid.Column="2" Margin="4,0,0,4">
-                                    <TextBox.Text>
-                                        <Binding Path="SaveCount" Mode="TwoWay">
-                                            <Binding.Converter>
-                                                <local:IntFormatter/>
-                                            </Binding.Converter>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
+                                <TextBox Text="{x:Bind SaveCount,Mode=TwoWay,Converter={StaticResource IntConverter}}" 
+                                         Grid.Row="1" Grid.Column="2" Margin="4,0,0,4"/>
                                 <Button Click="Button_Click" 
                                         Content="&#xED61;" FontFamily="Segoe MDL2 Assets"
                                         Grid.Row="1" Grid.Column="3" Margin="4,0,0,4"
                                         VerticalAlignment="Stretch"/>
+                                <ToggleButton Content="连线" IsChecked="{x:Bind Connect,Mode=TwoWay}"
+                                              Margin="0,0,0,4" HorizontalAlignment="Stretch"
+                                              Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"/>
                                 <ColorPicker Color="{x:Bind Color,Mode=TwoWay}"
-                                             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
+                                             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4"
                                              IsAlphaEnabled="True"
                                              IsAlphaTextInputVisible="False"
                                              IsColorPreviewVisible="False"
@@ -123,7 +114,6 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -131,28 +121,49 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <CheckBox Content="连线" MinWidth="0"
-                      Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                      IsChecked="{x:Bind ViewModelContext.Connection, Mode=TwoWay}" />
             <CheckBox Content="保持比例" MinWidth="0"
-                      Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                      Grid.Row="0" Grid.Column="0"
                       IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
             <CheckBox Content="发送信号" MinWidth="0"
-                      Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                      Grid.Row="1" Grid.Column="0"
                       IsChecked="{x:Bind ViewModelContext.Command, Mode=TwoWay}" />
+            <Button Content="&#xE722;" FontFamily="Segoe MDL2 Assets"
+                    Grid.Row="0" Grid.Column="1" Margin="4,0,0,1" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+            <DropDownButton Content="&#xE9D9;" FontFamily="Segoe MDL2 Assets"
+                            Grid.Row="1" Grid.Column="1" Margin="4,1,0,0"
+                            HorizontalAlignment="Stretch">
+                <DropDownButton.Flyout>
+                    <Flyout Opening="Flyout_Opening">
+                        <StackPanel Width="128">
+                            <TextBox PlaceholderText="显示点数" Margin="0,1"
+                                     Text="{x:Bind ViewModelContext.DefaultConfig.ShowCount, Mode=TwoWay, Converter={StaticResource IntConverter}}"/>
+                            <TextBox PlaceholderText="保存点数" Margin="0,1"
+                                     Text="{x:Bind ViewModelContext.DefaultConfig.SaveCount, Mode=TwoWay, Converter={StaticResource IntConverter}}"/>
+                            <ToggleButton Content="连线" Margin="0,1"
+                                          IsChecked="{x:Bind ViewModelContext.DefaultConfig.Connect, Mode=TwoWay}"
+                                          HorizontalAlignment="Stretch"/>
+                            <ToggleButton Content="背景模式" Margin="0,1"
+                                          IsChecked="{x:Bind ViewModelContext.DefaultConfig.Background, Mode=TwoWay}"
+                                          HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
             <ToggleButton Content="自动移动" IsChecked="{x:Bind ViewModelContext.AutoMove, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="0,4"
-                          Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" />
+                          Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
             <ToggleButton Content="自动X范围" IsChecked="{x:Bind ViewModelContext.AutoX, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="0,4,2,4"
-                          Grid.Row="4" Grid.Column="0" />
+                          Grid.Row="3" Grid.Column="0" />
             <ToggleButton Content="自动Y范围" IsChecked="{x:Bind ViewModelContext.AutoY, Mode=TwoWay}"
                           HorizontalAlignment="Stretch" Margin="2,4,0,4"
-                          Grid.Row="4" Grid.Column="1" />
+                          Grid.Row="3" Grid.Column="1" />
             <Button Content="背景颜色"
                     Background="{x:Bind ViewModelContext.BackgroundBrush, Mode=OneWay}"
                     HorizontalAlignment="Stretch" Margin="2,4,0,4"
-                    Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2">
+                    Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button.Flyout>
                     <Flyout>
                         <ColorPicker Color="{x:Bind ViewModelContext.Background, Mode=TwoWay}"
@@ -161,13 +172,14 @@
                 </Button.Flyout>
             </Button>
             <ListView Name="MainList"
+                      CanDragItems="True" CanReorderItems="True" AllowDrop="True"
                       ItemTemplate="{StaticResource GraphConfigTemplate}"
                       SelectionChanged="MainList_OnSelectionChanged"
                       Margin="0,4" SelectionMode="Multiple"
-                      Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" />
+                      Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
             <DropDownButton Content="&#xE710;" FontFamily="Segoe MDL2 Assets"
                             HorizontalAlignment="Stretch" Height="32"
-                            Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+                            Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
                 <DropDownButton.Flyout>
                     <Flyout Opening="Flyout_Opening">
                         <ListView x:Name="TopicList" SelectionChanged="Selector_OnSelectionChanged" />
