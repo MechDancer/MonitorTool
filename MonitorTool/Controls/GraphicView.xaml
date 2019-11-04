@@ -123,14 +123,15 @@
 
             <CheckBox Content="保持比例" MinWidth="0"
                       Grid.Row="0" Grid.Column="0"
-                      IsChecked="{x:Bind ViewModelContext.Proportional, Mode=TwoWay}" />
+                      IsChecked="{x:Bind ViewModelContext.Proportional,Mode=TwoWay}" />
             <CheckBox Content="发送信号" MinWidth="0"
                       Grid.Row="1" Grid.Column="0"
-                      IsChecked="{x:Bind ViewModelContext.Command, Mode=TwoWay}" />
-            <Button Content="&#xE722;" FontFamily="Segoe MDL2 Assets"
-                    Grid.Row="0" Grid.Column="1" Margin="4,0,0,1" 
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"/>
+                      IsChecked="{x:Bind ViewModelContext.Command,Mode=TwoWay}" />
+            <ToggleButton IsChecked="{x:Bind ViewModelContext.Frozen,Mode=TwoWay}"
+                          Content="&#xE840;" FontFamily="Segoe MDL2 Assets"
+                          Grid.Row="0" Grid.Column="1" Margin="4,0,0,1" 
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"/>
             <DropDownButton Content="&#xE9D9;" FontFamily="Segoe MDL2 Assets"
                             Grid.Row="1" Grid.Column="1" Margin="4,1,0,0"
                             HorizontalAlignment="Stretch">

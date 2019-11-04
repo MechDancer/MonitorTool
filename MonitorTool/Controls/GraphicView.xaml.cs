@@ -71,6 +71,7 @@ namespace MonitorTool.Controls {
                                         });
                                     return it;
                                 });
+                                if (ViewModelContext.Frozen) return;
                                 lock (list) {
                                     if (info.Type == GraphType.Frame) list.Clear();
                                     list.AddRange(frame);

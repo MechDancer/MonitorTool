@@ -15,6 +15,7 @@ namespace MonitorTool.Controls {
         private Color _background = Colors.Transparent;
         private bool  _proportional;
         private bool  _command;
+        private bool  _frozen;
 
         private float _x0, _x1, _y0, _y1;
 
@@ -72,6 +73,11 @@ namespace MonitorTool.Controls {
             set {
                 if (SetProperty(ref _command, value)) Canvas.Invalidate();
             }
+        }
+
+        public bool Frozen {
+            get => _frozen;
+            set => SetProperty(ref _frozen, value);
         }
 
         public Color Background {
